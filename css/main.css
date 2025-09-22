@@ -8,6 +8,13 @@ body{
 div.container {
     overflow: auto;
 }
+#titulo-pagina{
+    color:black;
+    text-align: center;
+}
+#imagen-local{
+    height: 600px;
+}
 header {
     background-color: #0a1d96;
     padding: 15px;
