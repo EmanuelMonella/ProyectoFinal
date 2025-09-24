@@ -3,7 +3,7 @@ function redirigir() {
     const contrasena = document.getElementById('contrasena').value;
 
     if (usuario === 'badia' && contrasena === '4038') {
-        window.location.href = "pages/index.html";
+        window.location.href = "pages/principal.html";
     } else {
         alert('Usuario o contraseña incorrectos');
     }
