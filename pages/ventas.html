@@ -30,19 +30,39 @@
         <main>
             <section>
                 <h2 id="titulo-pagina">Ventas:</h2>
-                <form action="">
-                    <label for="marca">Marca de batería</label>
-                    <select name="marca-bateria" id="marca-venta">
-                        <option value="valor1">Moura</option>
-                        <option value="valor2">Willard</option>
-                        <option value="valor3">Zeta</option>
-                    </select>
-                    <label for="cantidad">Ingrese cantidad:</label>
-                    <input type="number" name="cantidad" id="cantidad-venta">
-                    <label for="cliente">Cliente:</label>
-                    <input type="text" name="cliente" id="cliente-venta">
-                    <button>Guardar venta</button>
-                    <button>Descartar</button>
+                <form action="#" method="get">
+                    <table>
+                        <caption>Contacto</caption>
+                        <tr>
+                            <td><label for="marca">Marca</label></td>
+                            <td><select name="marca" id="marca-batería">
+                                <option value="moura">Moura</option>
+                                <option value="badia">Badia</option>
+                                <option value="zeta">Zeta</option>
+                                <option value="generica">Generica</option>
+                            </select></td>
+                        </tr>
+                        <tr>
+                            <td><label for="modelo">Modelo: </label></td>
+                            <td><input type="text" placeholder="Ingrese el amperaje"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="cantidad">Cantidad</label></td>
+                            <td><input type="number" id="cantidad-bateria" name="cantidad"></td>
+                        </tr>   
+                        <tr>
+                            <td><label for="cliente">Cliente</label></td>
+                            <td><input type="text" id="cliente" name="cliente" placeholder="Ingrese un nombre de cliente"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="comentario">Comentario</label></td>
+                            <td><textarea id="comentario" name="comentario" minlength="10"></textarea></td>
+                        </tr>
+                        <tr>
+                            <td><input type="submit" value="Enviar"></td>
+                            <td><input type="button" value="Descartar"></td>
+                        </tr>
+                    </table>
                 </form>
             </section>
 
