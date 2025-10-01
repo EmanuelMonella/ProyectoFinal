@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bateria Badia</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <header>
+        <h1 id="titulo-principal">Bateria Badia</h1>
+    </header>
+
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="../login.html">Inicio</a></li>
+                <li><a href="index.html">Nosotros</a></li>
+                <li><a href="#">Compras</a></li>
+                <li><a href="#">Ventas</a></li>
+                <li><a href="#">Reportes</a></li>
+                <li><a href="#">Stock</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section>
+                <h2 id="titulo-pagina">Reportes:</h2>
+                <form action="#" method="get">
+                    <table>
+                        <caption>Contacto</caption>
+                        <tr>
+                            <td><label for="marca">Marca</label></td>
+                            <td><select name="marca" id="marca-batería">
+                                <option value="moura">Moura</option>
+                                <option value="badia">Badia</option>
+                                <option value="zeta">Zeta</option>
+                                <option value="generica">Generica</option>
+                            </select></td>
+                        </tr>
+                        <tr>
+                            <td><label for="modelo">Modelo: </label></td>
+                            <td><input type="text" placeholder="Ingrese el amperaje"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="cantidad">Cantidad</label></td>
+                            <td><input type="number" id="cantidad-bateria" name="cantidad"></td>
+                        </tr>   
+                        <tr>
+                            <td><label for="cliente">Cliente</label></td>
+                            <td><input type="text" id="cliente" name="cliente" placeholder="Ingrese un nombre de cliente"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="comentario">Comentario</label></td>
+                            <td><textarea id="comentario" name="comentario" minlength="10"></textarea></td>
+                        </tr>
+                        <tr>
+                            <td><input type="submit" value="Enviar"></td>
+                            <td><input type="button" value="Descartar"></td>
+                        </tr>
+                    </table>
+                </form>
+            </section>
+
+            <section>
+                <h2>Lista de Usuarios</h2>
+                <table id="tabla-usuarios">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Datos dinámicos -->
+                    </tbody>
+                </table>
+            </section>
+        </main>
+
+        <div class="right">
+            <section>
+                <h2>Servicios</h2>
+                <ul>
+                    <li>Venta y colocación de baterías</li>
+                    <li>Alternadores y burros</li>
+                    <li>Colocación a domicilio</li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        <p>Copyright 2025 Bateria Badia</p>
+        <p>Desarrollado por Emanuel Monella</p>
+    </footer>
+
+    <script src="../js/usuarios.js"></script>
+</body>
+</html>
