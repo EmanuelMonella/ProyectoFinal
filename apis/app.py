@@ -15,10 +15,6 @@ def obtener_conexion():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-@app.route('/')
-def home():
-    return render_template('index.html')
-
 @app.route('/api/usuarios', methods=['GET'])
 def obtener_usuarios():
     nombre = request.args.get('nombre')

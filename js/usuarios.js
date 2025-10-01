@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('http://127.0.0.1:5000/api/usuarios')
+    fetch('http://127.0.0.1:5000/api/usuarios?nombre=Ana')
         .then(response => response.json())
         .then(data => {
             const tbody = document.querySelector('#tabla-usuarios tbody');
