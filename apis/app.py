@@ -4,7 +4,7 @@ import pymysql
 
 app = Flask(__name__)
 
-# ✅ CORS habilitado correctamente para TODOS los orígenes y rutas
+# Permitir CORS desde cualquier origen
 CORS(app)
 
 def obtener_conexion():
@@ -48,4 +48,5 @@ def actualizar_email(usuario_id):
         conexion.close()
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    # Escuchar en todas las interfaces de red
+    app.run(debug=True, host='0.0.0.0', port=5000)

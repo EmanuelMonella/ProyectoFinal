@@ -1,4 +1,4 @@
-function redirigir() { 
+function redirigir() {
     const usuario = document.getElementById('usuario').value;
     const contrasena = document.getElementById('contrasena').value;
 
@@ -7,5 +7,5 @@ function redirigir() {
     } else {
         alert('Usuario o contraseña incorrectos');
     }
-    
+
 }
