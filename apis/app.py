@@ -10,23 +10,23 @@ def obtener_conexion():
         host='localhost',
         user='ema',
         password='12345',
-        database='usuarios',
+        database='BADIA',
         charset='utf8mb4',
         cursorclass=pymysql.cursors.DictCursor
     )
 
-@app.route('/api/usuarios', methods=['GET'])
-def obtener_usuarios():
-    nombre = request.args.get('nombre')
+@app.route('/api/bateria', methods=['GET'])
+def obtener_baterias():
+    marca = request.args.get('marca')
     conexion = obtener_conexion()
     try:
         with conexion.cursor() as cursor:
-            if nombre:
-                cursor.execute("SELECT * FROM usuarios WHERE nombre LIKE %s;", ('%' + nombre + '%',))
+            if marca:
+                cursor.execute("SELECT * FROM bateria WHERE marca LIKE %s;", ('%' + marca + '%',))
             else:
-                cursor.execute("SELECT * FROM usuarios;")
-            usuarios = cursor.fetchall()
-            return jsonify(usuarios)
+                cursor.execute("SELECT * FROM bateria;")  # Corregido: no 'usuarios'
+            baterias = cursor.fetchall()
+            return jsonify(baterias)
     finally:
         conexion.close()
 
