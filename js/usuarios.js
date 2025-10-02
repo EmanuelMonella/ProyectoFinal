@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('http://127.0.0.1:5000/api/usuarios?nombre=Ana')
+    fetch('http://127.0.0.1:5000/api/usuarios')
         .then(response => response.json())
         .then(data => {
             const tbody = document.querySelector('#tabla-usuarios tbody');
@@ -18,4 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => {
             console.error('Error al obtener usuarios:', error);
         });
+});
+
+document.getElementById('btn-filtrar').addEventListener('click', function() {
+    const filtro = document.getElementById('busqueda-nombre').value.toLowerCase();
+    const filas = document.querySelectorAll('#tabla-usuarios tbody tr');
+    filas.forEach(fila => {
+        const nombre = fila.children[1].textContent.toLowerCase();
+        fila.style.display = nombre.includes(filtro) ? '' : 'none';
+    });
 });
