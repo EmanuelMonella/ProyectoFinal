@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pymysql
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
 CORS(app)
+
 
 def obtener_conexion():
     return pymysql.connect(
@@ -24,7 +25,7 @@ def obtener_baterias():
             if marca:
                 cursor.execute("SELECT * FROM bateria WHERE marca LIKE %s;", ('%' + marca + '%',))
             else:
-                cursor.execute("SELECT * FROM bateria;")  # Corregido: no 'usuarios'
+                cursor.execute("SELECT * FROM bateria;")
             baterias = cursor.fetchall()
             return jsonify(baterias)
     finally:
@@ -46,4 +47,5 @@ def actualizar_email(usuario_id):
         conexion.close()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Asegurate de estar escuchando en 127.0.0.1 y no localhost si hay problemas
+    app.run(debug=True, host='127.0.0.1', port=5000)

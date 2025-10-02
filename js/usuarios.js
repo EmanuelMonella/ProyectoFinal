@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('http://127.0.0.1:5000/api/bateria') // Ruta corregida
+    fetch('http://127.0.0.1:5000/api/bateria')
         .then(response => response.json())
         .then(data => {
             const tbody = document.querySelector('#tabla-baterias tbody');
