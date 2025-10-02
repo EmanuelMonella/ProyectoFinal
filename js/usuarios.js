@@ -1,6 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('http://127.0.0.1:5000/api/bateria')
-        .then(response => response.json())
+    fetch('http://127.0.0.1:5001/api/bateria')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Respuesta no válida del servidor');
+            }
+            return response.json();
+        })
         .then(data => {
             const tbody = document.querySelector('#tabla-baterias tbody');
             tbody.innerHTML = '';

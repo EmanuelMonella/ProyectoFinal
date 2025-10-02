@@ -48,5 +48,4 @@ def actualizar_email(usuario_id):
         conexion.close()
 
 if __name__ == '__main__':
-    # Escuchar en todas las interfaces de red
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)
