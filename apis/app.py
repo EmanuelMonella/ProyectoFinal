@@ -3,8 +3,9 @@ from flask_cors import CORS
 import pymysql
 
 app = Flask(__name__)
-CORS(app)
 
+# ✅ CORS habilitado correctamente para TODOS los orígenes y rutas
+CORS(app)
 
 def obtener_conexion():
     return pymysql.connect(
@@ -47,5 +48,4 @@ def actualizar_email(usuario_id):
         conexion.close()
 
 if __name__ == '__main__':
-    # Asegurate de estar escuchando en 127.0.0.1 y no localhost si hay problemas
     app.run(debug=True, host='127.0.0.1', port=5000)
