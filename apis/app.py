@@ -3,8 +3,6 @@ from flask_cors import CORS
 import pymysql
 
 app = Flask(__name__)
-
-# Permitir CORS desde cualquier origen
 CORS(app)
 
 def obtener_conexion():

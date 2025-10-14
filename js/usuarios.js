@@ -4,7 +4,6 @@ function cargarBaterias() {
         .then(data => {
             const tbody = document.querySelector('#tabla-baterias tbody');
             tbody.innerHTML = '';
-
             data.forEach(bateria => {
                 const fila = document.createElement('tr');
                 fila.innerHTML = `
@@ -19,19 +18,14 @@ function cargarBaterias() {
                 `;
                 tbody.appendChild(fila);
             });
-
-            // Disminuir stock
             document.querySelectorAll('.btn-disminuir').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const cantidad = this.previousElementSibling.value;
                     disminuirStock(this.dataset.id, cantidad);
                 });
             });
-
-            // Sumar stock
             document.querySelectorAll('.btn-sumar').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    // El input está dos elementos antes del botón "Sumar"
                     const cantidad = this.parentElement.querySelector('.input-cantidad').value;
                     sumarStock(this.dataset.id, cantidad);
                 });
