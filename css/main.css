@@ -85,7 +85,7 @@ main {
 }
 
 footer {
-    position: fixed;
+    position: relative;
     bottom: 0;
     background-color: #e5e5e5;
     text-align: center;
