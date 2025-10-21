@@ -6,6 +6,7 @@ app = Flask(__name__)
 CORS(app)
 
 def obtener_conexion():
+    """Obtiene una conexión a la base de datos MySQL."""
     return pymysql.connect(
         host='localhost',
         user='ema',
@@ -18,6 +19,7 @@ def obtener_conexion():
 # ENDPOINTS PARA BATERÍAS
 @app.route('/api/bateria', methods=['GET'])
 def obtener_baterias():
+    """Obtiene todas las baterías, con posibilidad de filtro por marca."""
     marca = request.args.get('marca')
     conexion = obtener_conexion()
     try:
@@ -31,9 +33,11 @@ def obtener_baterias():
 
 @app.route('/api/bateria', methods=['POST'])
 def agregar_bateria():
+    """Agrega una nueva batería a la base de datos."""
     try:
         datos = request.get_json()
         
+        # Validación de datos
         if not datos or 'marca' not in datos or 'modelo' not in datos or 'cantidad' not in datos:
             return jsonify({'error': 'Datos incompletos'}), 400
             
@@ -71,6 +75,7 @@ def agregar_bateria():
 
 @app.route('/api/bateria/<int:id>/disminuir', methods=['PUT'])
 def disminuir_stock(id):
+    """Disminuye el stock de una batería."""
     try:
         cantidad = request.json.get('cantidad', 1)
         if not isinstance(cantidad, int) or cantidad < 1:
@@ -101,6 +106,7 @@ def disminuir_stock(id):
 
 @app.route('/api/bateria/<int:id>/sumar', methods=['PUT'])
 def sumar_stock(id):
+    """Aumenta el stock de una batería."""
     try:
         cantidad = request.json.get('cantidad', 1)
         if not isinstance(cantidad, int) or cantidad < 1:
@@ -120,6 +126,7 @@ def sumar_stock(id):
 # Endpoints para Clientes
 @app.route('/api/clientes', methods=['GET'])
 def obtener_clientes():
+    """Obtiene todos los clientes, con filtro opcional."""
     busqueda = request.args.get('busqueda')
     conexion = obtener_conexion()
     try:
@@ -142,6 +149,7 @@ def obtener_clientes():
 
 @app.route('/api/clientes', methods=['POST'])
 def agregar_cliente():
+    """Agrega un nuevo cliente a la base de datos."""
     datos = request.json
     required_fields = ['nombre', 'telefono']
     if not all(field in datos for field in required_fields):
@@ -168,6 +176,7 @@ def agregar_cliente():
 
 @app.route('/api/clientes/<int:id>', methods=['PUT'])
 def actualizar_cliente(id):
+    """Actualiza los datos de un cliente."""
     datos = request.json
     campos_permitidos = ['nombre', 'vehiculo', 'telefono', 'direccion']
     actualizaciones = {k: v for k, v in datos.items() if k in campos_permitidos}
@@ -191,9 +200,29 @@ def actualizar_cliente(id):
     finally:
         conexion.close()
 
+@app.route('/api/clientes/<int:id>', methods=['DELETE'])
+def eliminar_cliente(id):
+    """Elimina un cliente de la base de datos por su id."""
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute("SELECT id FROM clientes WHERE id = %s;", (id,))
+            existe = cursor.fetchone()
+            if not existe:
+                return jsonify({'error': 'Cliente no encontrado'}), 404
+
+            cursor.execute("DELETE FROM clientes WHERE id = %s;", (id,))
+            conexion.commit()
+            return jsonify({'message': 'Cliente eliminado'}), 200
+    except pymysql.Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conexion.close()
+
 # Endpoint para Usuarios (existente)
 @app.route('/api/usuarios/<int:usuario_id>', methods=['PUT'])
 def actualizar_email(usuario_id):
+    """Actualiza el correo electrónico de un usuario."""
     nuevo_email = request.json.get('email')
     if not nuevo_email:
         return jsonify({'error': 'El email es requerido'}), 400

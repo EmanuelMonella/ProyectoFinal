@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bateria Badia</title>
+    <title>Batería Badia</title>
     <link rel="stylesheet" href="../css/main.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -12,8 +12,7 @@
 
 <body>
     <header>
-        <h1 id="titulo-principal">Bateria Badia</h1>
-
+        <h1 id="titulo-principal">Batería Badia</h1>
     </header>
     <div class="container">
         <nav>
@@ -28,13 +27,12 @@
             </ul>
         </nav>
         <main>
-
             <section class="centrado">
                 <h2 id="titulo-pagina">Gestión de Clientes</h2>
 
                 <!-- Filtrado -->
                 <div style="margin-bottom: 1em;">
-                    <input type="text" id="busqueda-cliente" placeholder="Buscar por nombre o vehículo">
+                    <input type="text" id="busqueda-clientes" placeholder="Buscar por nombre o vehículo">
                     <button type="button" id="btn-filtrar-clientes">Filtrar</button>
                 </div>
 
@@ -60,48 +58,41 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Ejemplo de datos estáticos -->
-                        <tr>
-                            <td>Carlos Gutierrez</td>
-                            <td>Ford Ranger 2020</td>
-                            <td>3515556789</td>
-                            <td>Av. Siempre Viva 742</td>
-                            <td>
-                                <button type="button" class="btn-editar">Editar</button>
-                                <button type="button" class="btn-eliminar">Eliminar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>María López</td>
-                            <td>Volkswagen Gol Trend</td>
-                            <td>3514443210</td>
-                            <td>Juan B. Justo 450</td>
-                            <td>
-                                <button type="button" class="btn-editar">Editar</button>
-                                <button type="button" class="btn-eliminar">Eliminar</button>
-                            </td>
-                        </tr>
+                        <!-- Los datos se cargarán aquí dinámicamente -->
                     </tbody>
                 </table>
             </section>
-
         </main>
         <div class="right">
             <section>
                 <h2>Servicios</h2>
                 <ul>
-                    <li>Venta y colocacion de baterias</li>
+                    <li>Venta y colocación de baterías</li>
                     <li>Alternadores y burros</li>
-                    <li>Colocacion a domicilio</li>
+                    <li>Colocación a domicilio</li>
                 </ul>
             </section>
         </div>
     </div>
 
     <footer>
-        <p>Copyright 2025 Bateria Badia</p>
+        <p>Copyright 2025 Batería Badia</p>
         <p>Desarrollado por Emanuel Monella</p>
     </footer>
+
+    <!-- Modal para editar cliente -->
+    <div id="modal-edicion">
+        <form id="form-editar">
+            <h3>Editar Cliente</h3>
+            <input type="text" id="editar-nombre" placeholder="Nombre completo" required>
+            <input type="text" id="editar-vehiculo" placeholder="Vehículo (modelo/año)">
+            <input type="tel" id="editar-telefono" placeholder="Teléfono" pattern="[0-9]{10}">
+            <input type="text" id="editar-direccion" placeholder="Dirección">
+            <button type="submit">Actualizar Cliente</button>
+            <button type="button" onclick="cerrarModal()">Cerrar</button>
+        </form>
+    </div>
+
     <script src="../js/clientes.js"></script>
 </body>
 

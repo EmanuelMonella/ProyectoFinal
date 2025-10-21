@@ -16,10 +16,6 @@ div.container {
     text-align: center;
 }
 
-#imagen-local {
-    height: 600px;
-}
-
 header {
     background-color: #0a1d96;
     padding: 15px;
@@ -37,7 +33,7 @@ nav {
 }
 
 nav ul {
-    padding-left: 0px
+    padding-left: 0px;
 }
 
 nav li {
@@ -61,12 +57,7 @@ nav li a:hover {
     box-shadow: #0a1d96 6px 6px 12px 0px;
     transform: translateY(-2px);
     transition: 0.3s;
-    padding: 8px;
-    margin-top: 7px;
-    display: block;
-    width: 100%;
     color: rgb(0, 162, 255);
-    font-weight: 700;
 }
 
 main {
@@ -107,21 +98,20 @@ form {
     justify-content: center;
 }
 
-#tabla-baterias {
+#tabla-clientes {
     border-collapse: collapse;
-    width: 500px;
+    width: 100%;
     margin: 0 auto;
 }
 
-#tabla-baterias th,
-#tabla-baterias td {
+#tabla-clientes th,
+#tabla-clientes td {
     border: 1px solid #333;
     padding: 8px;
     text-align: center;
-    width: 150px;
 }
 
-#tabla-baterias th {
+#tabla-clientes th {
     background-color: #f2f2f2;
 }
 
@@ -130,5 +120,94 @@ form {
     main,
     .right {
         width: 100%;
+    }
+}
+
+
+/* Estilos del modal (mejorados) */
+
+#modal-edicion {
+    display: none;
+    /* oculto por defecto */
+    position: fixed;
+    inset: 0;
+    /* top:0; right:0; bottom:0; left:0; */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* overlay */
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+
+/* clase alternativa si prefieres activar por clase: <div id="modal-edicion" class="show"> */
+
+#modal-edicion.show {
+    display: flex;
+}
+
+
+/* Sobrescribir el comportamiento global de `form` para el modal */
+
+#form-editar {
+    display: flex;
+    flex-direction: column;
+    /* campos uno debajo del otro */
+    gap: 12px;
+    /* espacio entre campos */
+    background-color: #ffffff;
+    padding: 32px;
+    /* más grande */
+    border-radius: 12px;
+    width: 100%;
+    max-width: 720px;
+    /* modal más ancho */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    color: #333;
+    font-family: inherit;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+
+/* Asegurar que los inputs ocupen línea completa */
+
+#form-editar input[type="text"],
+#form-editar input[type="tel"],
+#form-editar input[type="number"] {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* Botones alineados a la derecha y con tamaño más cómodo */
+
+#form-editar button {
+    min-width: 140px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    align-self: flex-end;
+    /* coloca los botones al final (derecha) */
+}
+
+
+/* Si quieres dos botones juntos, mantén pequeño margen entre ellos */
+
+#form-editar button+button {
+    margin-left: 8px;
+}
+
+
+/* Ajustes para pantallas pequeñas */
+
+@media (max-width: 520px) {
+    #form-editar {
+        padding: 20px;
+        max-width: 92%;
+    }
+    #form-editar button {
+        min-width: 120px;
     }
 }
