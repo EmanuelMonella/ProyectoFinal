@@ -1,9 +1,37 @@
-// Script completo para cargar clientes, abrir/cerrar modal y CRUD básico.
-
 let clienteEditId = null;
 
-// Cargar clientes al inicio
+// Función para asegurar que la tabla tenga un encabezado con 'ID'
+function asegurarEncabezado() {
+    const table = document.getElementById('tabla-clientes');
+    if (!table) return;
+
+    let thead = table.querySelector('thead');
+    if (!thead) {
+        thead = document.createElement('thead');
+        const tr = document.createElement('tr');
+        ['ID', 'Nombre', 'Vehículo', 'Teléfono', 'Dirección', 'Acciones'].forEach(text => {
+            const th = document.createElement('th');
+            th.textContent = text;
+            tr.appendChild(th);
+        });
+        thead.appendChild(tr);
+        table.insertBefore(thead, table.firstChild);
+    } else {
+        const headerRow = thead.querySelector('tr');
+        if (!headerRow) return;
+        const firstTh = headerRow.querySelector('th');
+        if (!firstTh || firstTh.textContent.trim().toLowerCase() !== 'id') {
+            const idTh = document.createElement('th');
+            idTh.textContent = 'ID';
+            headerRow.insertBefore(idTh, headerRow.firstChild);
+        }
+    }
+}
+
+// Cargar clientes desde la API
 function cargarClientes() {
+    asegurarEncabezado();
+
     fetch('http://127.0.0.1:5001/api/clientes')
         .then(res => {
             if (!res.ok) throw new Error('Error al obtener clientes');
@@ -11,26 +39,35 @@ function cargarClientes() {
         })
         .then(data => {
             const tbody = document.querySelector('#tabla-clientes tbody');
+            if (!tbody) {
+                console.error('No se encontró #tabla-clientes tbody en el DOM');
+                return;
+            }
             tbody.innerHTML = '';
             data.forEach(cliente => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    <td>${cliente.id ?? ''}</td>
                     <td>${cliente.nombre || ''}</td>
                     <td>${cliente.vehiculo || ''}</td>
                     <td>${cliente.telefono || ''}</td>
                     <td>${cliente.direccion || ''}</td>
                     <td>
-                        <button class="btn-editar" data-id="${cliente.id}">Editar</button>
-                        <button class="btn-eliminar" data-id="${cliente.id}">Eliminar</button>
+                        <button class="btn-editar" data-id="${cliente.id ?? ''}">Editar</button>
+                        <button class="btn-eliminar" data-id="${cliente.id ?? ''}">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            // asignar eventos despues de renderizar
+            // Asignar eventos después de renderizar
             document.querySelectorAll('.btn-editar').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = this.dataset.id;
+                    if (!id) {
+                        alert('ID de cliente no definido.');
+                        return;
+                    }
                     abrirModalEdicion(id);
                 });
             });
@@ -38,6 +75,10 @@ function cargarClientes() {
             document.querySelectorAll('.btn-eliminar').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = this.dataset.id;
+                    if (!id) {
+                        alert('ID de cliente no definido.');
+                        return;
+                    }
                     if (confirm('¿Eliminar cliente?')) eliminarCliente(id);
                 });
             });
@@ -45,8 +86,9 @@ function cargarClientes() {
         .catch(err => console.error(err));
 }
 
+// Función para abrir el modal de edición
 function abrirModalEdicion(id) {
-    // obtener datos del cliente y abrir modal con valores
+    // Obtener datos del cliente y abrir modal con valores
     fetch(`http://127.0.0.1:5001/api/clientes`)
         .then(res => {
             if (!res.ok) throw new Error('Error al obtener clientes');
@@ -59,25 +101,29 @@ function abrirModalEdicion(id) {
                 return;
             }
             clienteEditId = cliente.id;
-            document.getElementById('editar-nombre').value = cliente.nombre || '';
-            document.getElementById('editar-vehiculo').value = cliente.vehiculo || '';
-            document.getElementById('editar-telefono').value = cliente.telefono || '';
-            document.getElementById('editar-direccion').value = cliente.direccion || '';
+            const nombreEl = document.getElementById('editar-nombre');
+            const vehiculoEl = document.getElementById('editar-vehiculo');
+            const telefonoEl = document.getElementById('editar-telefono');
+            const direccionEl = document.getElementById('editar-direccion');
+            if (nombreEl) nombreEl.value = cliente.nombre || '';
+            if (vehiculoEl) vehiculoEl.value = cliente.vehiculo || '';
+            if (telefonoEl) telefonoEl.value = cliente.telefono || '';
+            if (direccionEl) direccionEl.value = cliente.direccion || '';
 
             const modal = document.getElementById('modal-edicion');
-            // usar flex para que se active el centrado por CSS
-            modal.style.display = 'flex';
+            if (modal) modal.style.display = 'flex';
         })
         .catch(err => console.error(err));
 }
 
-// función global llamada desde el HTML onclick
+// Función global llamada desde el HTML onclick
 function cerrarModal() {
     clienteEditId = null;
     const modal = document.getElementById('modal-edicion');
-    modal.style.display = 'none';
+    if (modal) modal.style.display = 'none';
 }
 
+// Función para eliminar un cliente
 function eliminarCliente(id) {
     fetch(`http://127.0.0.1:5001/api/clientes/${id}`, {
             method: 'DELETE'
@@ -89,89 +135,105 @@ function eliminarCliente(id) {
         .catch(err => console.error(err));
 }
 
+// Función para agregar un cliente
 document.addEventListener('DOMContentLoaded', () => {
-    // asegurar que el modal esté oculto inicialmente
     const modal = document.getElementById('modal-edicion');
     if (modal) modal.style.display = 'none';
 
     cargarClientes();
 
-    // filtrar
-    document.getElementById('btn-filtrar-clientes').addEventListener('click', () => {
-        const filtro = document.getElementById('busqueda-clientes').value.toLowerCase();
-        const filas = document.querySelectorAll('#tabla-clientes tbody tr');
-        filas.forEach(fila => {
-            const nombre = fila.children[0].textContent.toLowerCase();
-            const vehiculo = fila.children[1].textContent.toLowerCase();
-            fila.style.display = (nombre.includes(filtro) || vehiculo.includes(filtro)) ? '' : 'none';
+    const btnFiltrar = document.getElementById('btn-filtrar-clientes');
+    if (btnFiltrar) {
+        btnFiltrar.addEventListener('click', () => {
+            const filtro = document.getElementById('busqueda-clientes').value.toLowerCase();
+            const filas = document.querySelectorAll('#tabla-clientes tbody tr');
+            filas.forEach(fila => {
+                const nombre = fila.children[1].textContent.toLowerCase();
+                const vehiculo = fila.children[2].textContent.toLowerCase();
+                fila.style.display = (nombre.includes(filtro) || vehiculo.includes(filtro)) ? '' : 'none';
+            });
         });
-    });
+    }
 
-    // agregar cliente
-    document.getElementById('btn-agregar-cliente').addEventListener('click', () => {
-        const nombre = document.getElementById('nuevo-nombre').value.trim();
-        const vehiculo = document.getElementById('nuevo-vehiculo').value.trim();
-        const telefono = document.getElementById('nuevo-telefono').value.trim();
-        const direccion = document.getElementById('nuevo-direccion').value.trim();
+    // Agregar cliente
+    const btnAgregar = document.getElementById('btn-agregar-cliente');
+    if (btnAgregar) {
+        btnAgregar.addEventListener('click', () => {
+            const nombre = document.getElementById('nuevo-nombre').value.trim();
+            const vehiculo = document.getElementById('nuevo-vehiculo').value.trim();
+            const telefono = document.getElementById('nuevo-telefono').value.trim();
+            const direccion = document.getElementById('nuevo-direccion').value.trim();
 
-        if (!nombre) {
-            alert('El nombre es obligatorio.');
-            return;
-        }
+            if (!nombre) {
+                alert('El nombre es obligatorio.');
+                return;
+            }
 
-        fetch('http://127.0.0.1:5001/api/clientes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, vehiculo, telefono, direccion })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('Error al agregar cliente');
-                return res.json();
-            })
-            .then(() => {
-                // limpiar campos y recargar tabla
-                document.getElementById('nuevo-nombre').value = '';
-                document.getElementById('nuevo-vehiculo').value = '';
-                document.getElementById('nuevo-telefono').value = '';
-                document.getElementById('nuevo-direccion').value = '';
-                cargarClientes();
-            })
-            .catch(err => console.error(err));
-    });
+            fetch('http://127.0.0.1:5001/api/clientes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, vehiculo, telefono, direccion })
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Error al agregar cliente');
+                    return res.json();
+                })
+                .then(() => {
+                    // Limpiar campos y recargar tabla
+                    document.getElementById('nuevo-nombre').value = '';
+                    document.getElementById('nuevo-vehiculo').value = '';
+                    document.getElementById('nuevo-telefono').value = '';
+                    document.getElementById('nuevo-direccion').value = '';
+                    cargarClientes();
+                })
+                .catch(err => console.error(err));
+        });
+    }
 
-    // submit del formulario de edición
+    // Submit del formulario de edición
     const formEditar = document.getElementById('form-editar');
-    formEditar.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (!clienteEditId) return alert('ID de cliente no definido.');
+    if (formEditar) {
+        formEditar.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!clienteEditId) return alert('ID de cliente no definido.');
 
-        const nombre = document.getElementById('editar-nombre').value.trim();
-        const vehiculo = document.getElementById('editar-vehiculo').value.trim();
-        const telefono = document.getElementById('editar-telefono').value.trim();
-        const direccion = document.getElementById('editar-direccion').value.trim();
+            // Obtener valores de los campos
+            const nombre = document.getElementById('editar-nombre').value.trim();
+            const vehiculo = document.getElementById('editar-vehiculo').value.trim();
+            const telefono = document.getElementById('editar-telefono').value.trim();
+            const direccion = document.getElementById('editar-direccion').value.trim();
 
-        fetch(`http://127.0.0.1:5001/api/clientes/${clienteEditId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, vehiculo, telefono, direccion })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('Error al actualizar cliente');
-                return res.json();
-            })
-            .then(() => {
-                cerrarModal();
-                cargarClientes();
-            })
-            .catch(err => console.error(err));
-    });
+            if (!nombre) {
+                return alert('El nombre es obligatorio.');
+            }
 
-    // cerrar modal al hacer click fuera del contenido (opcional)
+            // Enviar solicitud PUT para actualizar el cliente
+            fetch(`http://127.0.0.1:5001/api/clientes/${clienteEditId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, vehiculo, telefono, direccion })
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Error al actualizar cliente');
+                    return res.json();
+                })
+                .then(() => {
+                    cerrarModal();
+                    cargarClientes();
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('No se pudo actualizar el cliente. Intenta nuevamente.');
+                });
+        });
+    }
+
+    // Cerrar modal al hacer click fuera del contenido
     window.addEventListener('click', (e) => {
         const modal = document.getElementById('modal-edicion');
         if (e.target === modal) cerrarModal();
     });
 });
 
-// Exponer cerrarModal globalmente (para onclick en HTML)
+// Exponer cerrarModal globalmente
 window.cerrarModal = cerrarModal;
