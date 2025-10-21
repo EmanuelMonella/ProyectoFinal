@@ -10,26 +10,188 @@ def obtener_conexion():
         host='localhost',
         user='ema',
         password='12345',
-        database='BADIA',
+        database='baterias_badia',
         charset='utf8mb4',
         cursorclass=pymysql.cursors.DictCursor
     )
 
+# ENDPOINTS PARA BATERÍAS
 @app.route('/api/bateria', methods=['GET'])
 def obtener_baterias():
     marca = request.args.get('marca')
     conexion = obtener_conexion()
     try:
         with conexion.cursor() as cursor:
-            if marca:
-                cursor.execute("SELECT * FROM bateria WHERE marca LIKE %s;", ('%' + marca + '%',))
-            else:
-                cursor.execute("SELECT * FROM bateria;")
-            baterias = cursor.fetchall()
-            return jsonify(baterias)
+            sql = "SELECT * FROM bateria" + (" WHERE marca LIKE %s" if marca else "")
+            params = ('%' + marca + '%',) if marca else ()
+            cursor.execute(sql, params)
+            return jsonify(cursor.fetchall())
     finally:
         conexion.close()
 
+@app.route('/api/bateria', methods=['POST'])
+def agregar_bateria():
+    try:
+        datos = request.get_json()
+        
+        if not datos or 'marca' not in datos or 'modelo' not in datos or 'cantidad' not in datos:
+            return jsonify({'error': 'Datos incompletos'}), 400
+            
+        if not isinstance(datos['cantidad'], int) or datos['cantidad'] < 0:
+            return jsonify({'error': 'Cantidad inválida'}), 400
+
+        with obtener_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                # Verificar existencia
+                cursor.execute(
+                    "SELECT id FROM bateria WHERE marca = %s AND modelo = %s",
+                    (datos['marca'], datos['modelo'])
+                )
+                if cursor.fetchone():
+                    return jsonify({'error': 'La combinación marca/modelo ya existe'}), 409
+                
+                # Insertar nuevo registro
+                cursor.execute(
+                    "INSERT INTO bateria (marca, modelo, cantidad) VALUES (%s, %s, %s)",
+                    (datos['marca'], datos['modelo'], datos['cantidad'])
+                )
+                conexion.commit()
+                return jsonify({
+                    'mensaje': 'Batería creada',
+                    'id': cursor.lastrowid,
+                    'marca': datos['marca'],
+                    'modelo': datos['modelo'],
+                    'cantidad': datos['cantidad']
+                }), 201
+                
+    except pymysql.IntegrityError as e:
+        return jsonify({'error': 'Error de integridad: ' + str(e)}), 400
+    except pymysql.Error as e:
+        return jsonify({'error': 'Error de base de datos: ' + str(e)}), 500
+
+@app.route('/api/bateria/<int:id>/disminuir', methods=['PUT'])
+def disminuir_stock(id):
+    try:
+        cantidad = request.json.get('cantidad', 1)
+        if not isinstance(cantidad, int) or cantidad < 1:
+            return jsonify({'error': 'Cantidad inválida'}), 400
+
+        with obtener_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                cursor.execute("SELECT cantidad FROM bateria WHERE id = %s", (id,))
+                resultado = cursor.fetchone()
+                
+                if not resultado:
+                    return jsonify({'error': 'Batería no encontrada'}), 404
+                
+                if resultado['cantidad'] < cantidad:
+                    return jsonify({'error': 'Stock insuficiente'}), 400
+                
+                cursor.execute(
+                    "UPDATE bateria SET cantidad = cantidad - %s WHERE id = %s",
+                    (cantidad, id)
+                )
+                conexion.commit()
+                return jsonify({
+                    'nueva_cantidad': resultado['cantidad'] - cantidad,
+                    'mensaje': 'Stock actualizado'
+                })
+    except pymysql.Error as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/bateria/<int:id>/sumar', methods=['PUT'])
+def sumar_stock(id):
+    try:
+        cantidad = request.json.get('cantidad', 1)
+        if not isinstance(cantidad, int) or cantidad < 1:
+            return jsonify({'error': 'Cantidad inválida'}), 400
+
+        with obtener_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE bateria SET cantidad = cantidad + %s WHERE id = %s",
+                    (cantidad, id)
+                )
+                conexion.commit()
+                return jsonify({'mensaje': 'Stock incrementado correctamente'})
+    except pymysql.Error as e:
+        return jsonify({'error': str(e)}), 500
+
+# Endpoints para Clientes
+@app.route('/api/clientes', methods=['GET'])
+def obtener_clientes():
+    busqueda = request.args.get('busqueda')
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            if busqueda:
+                sql = """
+                    SELECT * FROM cliente 
+                    WHERE nombre LIKE %s 
+                    OR vehiculo LIKE %s 
+                    OR telefono LIKE %s;
+                """
+                param = f'%{busqueda}%'
+                cursor.execute(sql, (param, param, param))
+            else:
+                cursor.execute("SELECT * FROM cliente;")
+            clientes = cursor.fetchall()
+            return jsonify(clientes)
+    finally:
+        conexion.close()
+
+@app.route('/api/clientes', methods=['POST'])
+def agregar_cliente():
+    datos = request.json
+    required_fields = ['nombre', 'telefono']
+    if not all(field in datos for field in required_fields):
+        return jsonify({'error': 'Nombre y teléfono son requeridos'}), 400
+
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            sql = """
+                INSERT INTO cliente 
+                (nombre, vehiculo, telefono, direccion) 
+                VALUES (%s, %s, %s, %s);
+            """
+            cursor.execute(sql, (
+                datos['nombre'],
+                datos.get('vehiculo'),
+                datos['telefono'],
+                datos.get('direccion')
+            ))
+            conexion.commit()
+            return jsonify({'mensaje': 'Cliente agregado exitosamente'}), 201
+    finally:
+        conexion.close()
+
+@app.route('/api/clientes/<int:id>', methods=['PUT'])
+def actualizar_cliente(id):
+    datos = request.json
+    campos_permitidos = ['nombre', 'vehiculo', 'telefono', 'direccion']
+    actualizaciones = {k: v for k, v in datos.items() if k in campos_permitidos}
+
+    if not actualizaciones:
+        return jsonify({'error': 'No se proporcionaron campos válidos para actualizar'}), 400
+
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            set_clause = ', '.join([f"{k} = %s" for k in actualizaciones.keys()])
+            valores = list(actualizaciones.values()) + [id]
+            
+            sql = f"UPDATE cliente SET {set_clause} WHERE id = %s;"
+            cursor.execute(sql, valores)
+            conexion.commit()
+            
+            cursor.execute("SELECT * FROM cliente WHERE id = %s;", (id,))
+            cliente_actualizado = cursor.fetchone()
+            return jsonify(cliente_actualizado)
+    finally:
+        conexion.close()
+
+# Endpoint para Usuarios (existente)
 @app.route('/api/usuarios/<int:usuario_id>', methods=['PUT'])
 def actualizar_email(usuario_id):
     nuevo_email = request.json.get('email')
@@ -44,67 +206,6 @@ def actualizar_email(usuario_id):
             return jsonify({'mensaje': 'Email actualizado exitosamente'})
     finally:
         conexion.close()
-@app.route('/api/bateria', methods=['POST'])
-def agregar_bateria():
-    datos = request.json
-    marca = datos.get('marca')
-    modelo = datos.get('modelo')
-    stock = datos.get('stock')
 
-    if not marca or not modelo or stock is None:
-        return jsonify({'error': 'Marca, modelo y stock son requeridos'}), 400
-
-    conexion = obtener_conexion()
-    try:
-        with conexion.cursor() as cursor:
-            cursor.execute("INSERT INTO bateria (marca, modelo, stock) VALUES (%s, %s, %s);", (marca, modelo, stock))
-            conexion.commit()
-            return jsonify({'mensaje': 'Batería agregada exitosamente'}), 201
-    finally:
-        conexion.close()   
-
-@app.route('/api/bateria/<int:id>/disminuir', methods=['PUT'])
-def disminuir_stock(id):
-    datos = request.json
-    cantidad = datos.get('cantidad', 1)
-    if cantidad < 1:
-        return jsonify({'error': 'Cantidad inválida'}), 400
-
-    conexion = obtener_conexion()
-    try:
-        with conexion.cursor() as cursor:
-            cursor.execute("SELECT stock FROM bateria WHERE id = %s;", (id,))
-            bateria = cursor.fetchone()
-            if not bateria or bateria['stock'] < cantidad:
-                return jsonify({'error': 'No encontrado o stock insuficiente'}), 404
-            cursor.execute("UPDATE bateria SET stock = stock - %s WHERE id = %s;", (cantidad, id))
-            conexion.commit()
-            cursor.execute("SELECT * FROM bateria WHERE id = %s;", (id,))
-            bateria_actualizada = cursor.fetchone()
-            return jsonify(bateria_actualizada)
-    finally:
-        conexion.close()
-
-@app.route('/api/bateria/<int:id>/sumar', methods=['PUT'])
-def sumar_stock(id):
-    datos = request.json
-    cantidad = datos.get('cantidad', 1)
-    if cantidad < 1:
-        return jsonify({'error': 'Cantidad inválida'}), 400
-
-    conexion = obtener_conexion()
-    try:
-        with conexion.cursor() as cursor:
-            cursor.execute("SELECT stock FROM bateria WHERE id = %s;", (id,))
-            bateria = cursor.fetchone()
-            if not bateria:
-                return jsonify({'error': 'No encontrado'}), 404
-            cursor.execute("UPDATE bateria SET stock = stock + %s WHERE id = %s;", (cantidad, id))
-            conexion.commit()
-            cursor.execute("SELECT * FROM bateria WHERE id = %s;", (id,))
-            bateria_actualizada = cursor.fetchone()
-            return jsonify(bateria_actualizada)
-    finally:
-        conexion.close()
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)
