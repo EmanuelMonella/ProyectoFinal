@@ -47,14 +47,14 @@ function cargarClientes() {
             data.forEach(cliente => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${cliente.id ?? ''}</td>
+                    <td>${cliente.id_cliente ?? ''}</td>
                     <td>${cliente.nombre || ''}</td>
                     <td>${cliente.vehiculo || ''}</td>
                     <td>${cliente.telefono || ''}</td>
                     <td>${cliente.direccion || ''}</td>
                     <td>
-                        <button class="btn-editar" data-id="${cliente.id ?? ''}">Editar</button>
-                        <button class="btn-eliminar" data-id="${cliente.id ?? ''}">Eliminar</button>
+                        <button class="btn-editar" data-id="${cliente.id_cliente ?? ''}">Editar</button>
+                        <button class="btn-eliminar" data-id="${cliente.id_cliente ?? ''}">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -63,23 +63,23 @@ function cargarClientes() {
             // Asignar eventos después de renderizar
             document.querySelectorAll('.btn-editar').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const id = this.dataset.id;
-                    if (!id) {
+                    const id_cliente = this.dataset.id;
+                    if (!id_cliente) {
                         alert('ID de cliente no definido.');
                         return;
                     }
-                    abrirModalEdicion(id);
+                    abrirModalEdicion(id_cliente);
                 });
             });
 
             document.querySelectorAll('.btn-eliminar').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const id = this.dataset.id;
-                    if (!id) {
+                    const id_cliente = this.dataset.id;
+                    if (!id_cliente) {
                         alert('ID de cliente no definido.');
                         return;
                     }
-                    if (confirm('¿Eliminar cliente?')) eliminarCliente(id);
+                    if (confirm('¿Eliminar cliente?')) eliminarCliente(id_cliente);
                 });
             });
         })
@@ -87,7 +87,7 @@ function cargarClientes() {
 }
 
 // Función para abrir el modal de edición
-function abrirModalEdicion(id) {
+function abrirModalEdicion(id_cliente) {
     // Obtener datos del cliente y abrir modal con valores
     fetch(`http://127.0.0.1:5001/api/clientes`)
         .then(res => {
@@ -95,12 +95,12 @@ function abrirModalEdicion(id) {
             return res.json();
         })
         .then(data => {
-            const cliente = data.find(c => String(c.id) === String(id));
+            const cliente = data.find(c => String(c.id_cliente) === String(id_cliente));
             if (!cliente) {
                 alert('Cliente no encontrado');
                 return;
             }
-            clienteEditId = cliente.id;
+            clienteEditId = cliente.id_cliente;
             const nombreEl = document.getElementById('editar-nombre');
             const vehiculoEl = document.getElementById('editar-vehiculo');
             const telefonoEl = document.getElementById('editar-telefono');
@@ -124,8 +124,8 @@ function cerrarModal() {
 }
 
 // Función para eliminar un cliente
-function eliminarCliente(id) {
-    fetch(`http://127.0.0.1:5001/api/clientes/${id}`, {
+function eliminarCliente(id_cliente) {
+    fetch(`http://127.0.0.1:5001/api/clientes/${id_cliente}`, {
             method: 'DELETE'
         })
         .then(res => {
