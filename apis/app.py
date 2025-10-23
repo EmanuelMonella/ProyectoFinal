@@ -93,21 +93,28 @@ def disminuir_stock(id):
 
         with obtener_conexion() as conexion:
             with conexion.cursor() as cursor:
-                # Verificar stock suficiente
                 cursor.execute("SELECT stock FROM bateria WHERE id = %s", (id,))
-                actual = cursor.fetchone()['stock']
-
-                if actual < datos['stock']:
-                    return jsonify({'error': 'Stock insuficiente'}), 400
+                resultado = cursor.fetchone()
                 
+                if not resultado:
+                    return jsonify({'error': 'Batería no encontrada'}), 404
+                
+                actual = resultado['stock']
+                if actual < datos['stock']:
+                    return jsonify({
+                        'error': f'Stock insuficiente (actual: {actual}, requerido: {datos["stock"]})'
+                    }), 400
+                
+                # Disminución segura con protección contra negativos
+                nuevo_stock = actual - datos['stock']
                 cursor.execute(
-                    "UPDATE bateria SET stock = stock - %s WHERE id = %s",
-                    (datos['stock'], id)
+                    "UPDATE bateria SET stock = %s WHERE id = %s",
+                    (max(nuevo_stock, 0), id)  # Nunca menor a 0
                 )
                 conexion.commit()
-                return jsonify({'mensaje': 'Stock actualizado'}), 200
+                return jsonify({'mensaje': 'Stock actualizado', 'nuevo_stock': max(nuevo_stock, 0)}), 200
     except pymysql.Error as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Error de base de datos: {str(e)}'}), 500
 
 
 # ===========================

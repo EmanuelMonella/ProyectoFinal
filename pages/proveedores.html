@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bateria Badia</title>
+    <title>Batería Badia</title>
     <link rel="stylesheet" href="../css/main.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -12,8 +12,7 @@
 
 <body>
     <header>
-        <h1 id="titulo-principal">Bateria Badia</h1>
-
+        <h1 id="titulo-principal">Batería Badia</h1>
     </header>
     <div class="container">
         <nav>
@@ -27,62 +26,75 @@
                 <li><a href="proveedores.html">Proveedores</a></li>
             </ul>
         </nav>
-        <main>
-            <section>
-                <h2 id="titulo-pagina">Ventas:</h2>
-                <form action="#" method="get">
-                    <table>
-                        <caption>Contacto</caption>
-                        <tr>
-                            <td><label for="marca">Marca</label></td>
-                            <td><select name="marca" id="marca-batería">
-                                <option value="moura">Moura</option>
-                                <option value="badia">Badia</option>
-                                <option value="zeta">Zeta</option>
-                                <option value="generica">Generica</option>
-                            </select></td>
-                        </tr>
-                        <tr>
-                            <td><label for="modelo">Modelo: </label></td>
-                            <td><input type="text" placeholder="Ingrese el amperaje"></td>
-                        </tr>
-                        <tr>
-                            <td><label for="cantidad">Cantidad</label></td>
-                            <td><input type="number" id="cantidad-bateria" name="cantidad"></td>
-                        </tr>
-                        <tr>
-                            <td><label for="cliente">Cliente</label></td>
-                            <td><input type="text" id="cliente" name="cliente" placeholder="Ingrese un nombre de cliente"></td>
-                        </tr>
-                        <tr>
-                            <td><label for="comentario">Comentario</label></td>
-                            <td><textarea id="comentario" name="comentario" minlength="10"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><input type="submit" value="Enviar"></td>
-                            <td><input type="button" value="Descartar"></td>
-                        </tr>
-                    </table>
-                </form>
-            </section>
 
+        <main>
+            <section class="centrado">
+                <h2 id="titulo-pagina">Gestión de Proveedores</h2>
+
+                <!-- Filtrado -->
+                <div style="margin-bottom: 1em;">
+                    <input type="text" id="busqueda-proveedores" placeholder="Buscar por nombre o contacto">
+                    <button type="button" id="btn-filtrar-proveedores">Filtrar</button>
+                </div>
+
+                <!-- Agregar nuevo -->
+                <div style="margin-bottom: 1em;">
+                    <input type="text" id="nuevo-nombre" placeholder="Nombre completo*" required>
+                    <input type="text" id="nuevo-cuit" placeholder="CUIT (20-XXXXXXXX-X)" pattern="\d{2}-\d{8}-\d">
+                    <input type="tel" id="nuevo-telefono" placeholder="Teléfono (3515551234)" pattern="[0-9]{10}">
+
+                    <button type="button" id="btn-agregar-proveedor">Agregar Proveedor</button>
+                </div>
+
+                <!-- Listado -->
+                <h2>Registro de Proveedores</h2>
+                <table id="tabla-proveedores">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>CUIT</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se cargarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </section>
         </main>
+
         <div class="right">
             <section>
                 <h2>Servicios</h2>
                 <ul>
-                    <li>Venta y colocacion de baterias</li>
+                    <li>Venta y colocación de baterías</li>
                     <li>Alternadores y burros</li>
-                    <li>Colocacion a domicilio</li>
+                    <li>Colocación a domicilio</li>
                 </ul>
             </section>
         </div>
     </div>
 
     <footer>
-        <p>Copyright 2025 Bateria Badia</p>
+        <p>Copyright 2025 Batería Badia</p>
         <p>Desarrollado por Emanuel Monella</p>
     </footer>
+
+    <!-- Modal para editar cliente -->
+    <div id="modal-edicion">
+        <form id="form-editar">
+            <h3>Editar Proveedor</h3>
+            <input type="text" id="editar-nombre" placeholder="Nombre completo" required>
+            <input type="text" id="editar-cuit" placeholder="CUIT (20-XXXXXXXX-X)" pattern="\d{2}-\d{8}-\d">
+            <input type="tel" id="editar-telefono" placeholder="Teléfono" pattern="[0-9]{10}">
+            <button type="submit">Actualizar Proveedor</button>
+            <button type="button" onclick="cerrarModal()">Cerrar</button>
+        </form>
+    </div>
+
+    <script src="../js/proveedores.js"></script>
 </body>
 
 </html>
