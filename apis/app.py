@@ -36,11 +36,11 @@ def obtener_baterias():
 def agregar_bateria():
     try:
         datos = request.get_json()
-        if not datos or 'marca' not in datos or 'modelo' not in datos or 'cantidad' not in datos:
+        if not datos or 'marca' not in datos or 'modelo' not in datos or 'stock' not in datos:
             return jsonify({'error': 'Datos incompletos'}), 400
-            
-        if not isinstance(datos['cantidad'], int) or datos['cantidad'] < 0:
-            return jsonify({'error': 'Cantidad inválida'}), 400
+
+        if not isinstance(datos['stock'], int) or datos['stock'] < 0:
+            return jsonify({'error': 'Stock inválido'}), 400
 
         with obtener_conexion() as conexion:
             with conexion.cursor() as cursor:
@@ -52,8 +52,8 @@ def agregar_bateria():
                     return jsonify({'error': 'La combinación marca/modelo ya existe'}), 409
                 
                 cursor.execute(
-                    "INSERT INTO bateria (marca, modelo, cantidad) VALUES (%s, %s, %s)",
-                    (datos['marca'], datos['modelo'], datos['cantidad'])
+                    "INSERT INTO bateria (marca, modelo, stock) VALUES (%s, %s, %s)",
+                    (datos['marca'], datos['modelo'], datos['stock'])
                 )
                 conexion.commit()
                 return jsonify({
@@ -61,10 +61,53 @@ def agregar_bateria():
                     'id': cursor.lastrowid,
                     'marca': datos['marca'],
                     'modelo': datos['modelo'],
-                    'cantidad': datos['cantidad']
+                    'stock': datos['stock']
                 }), 201
     except pymysql.Error as e:
         return jsonify({'error': 'Error de base de datos: ' + str(e)}), 500
+
+@app.route('/api/bateria/<int:id>/sumar', methods=['PUT'])
+def sumar_stock(id):
+    try:
+        datos = request.get_json()
+        if 'stock' not in datos or not isinstance(datos['stock'], int) or datos['stock'] < 1:
+            return jsonify({'error': 'Stock inválido'}), 400
+
+        with obtener_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE bateria SET stock = stock + %s WHERE id = %s",
+                    (datos['stock'], id)
+                )
+                conexion.commit()
+                return jsonify({'mensaje': 'Stock actualizado'}), 200
+    except pymysql.Error as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/bateria/<int:id>/disminuir', methods=['PUT'])
+def disminuir_stock(id):
+    try:
+        datos = request.get_json()
+        if 'stock' not in datos or not isinstance(datos['stock'], int) or datos['stock'] < 1:
+            return jsonify({'error': 'Stock inválido'}), 400
+
+        with obtener_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                # Verificar stock suficiente
+                cursor.execute("SELECT stock FROM bateria WHERE id = %s", (id,))
+                actual = cursor.fetchone()['stock']
+
+                if actual < datos['stock']:
+                    return jsonify({'error': 'Stock insuficiente'}), 400
+                
+                cursor.execute(
+                    "UPDATE bateria SET stock = stock - %s WHERE id = %s",
+                    (datos['stock'], id)
+                )
+                conexion.commit()
+                return jsonify({'mensaje': 'Stock actualizado'}), 200
+    except pymysql.Error as e:
+        return jsonify({'error': str(e)}), 500
 
 
 # ===========================
