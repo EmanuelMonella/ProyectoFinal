@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const btnFiltrar = document.getElementById('btn-filtrar');
     const btnAgregar = document.getElementById('btn-agregar');
+    const tbody = document.querySelector('#tabla-baterias tbody');
 
     // Cargar datos iniciales
     cargarBaterias();
@@ -15,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnAgregar.addEventListener('click', async() => {
         const marca = document.getElementById('nuevo-marca').value.trim();
         const modelo = document.getElementById('nuevo-modelo').value.trim();
-        const stock = parseInt(document.getElementById('nuevo-stock').value, 10);
+        const stockRaw = document.getElementById('nuevo-stock').value;
+        const stock = parseInt(stockRaw, 10);
 
         if (!validarDatos(marca, modelo, stock)) return;
 
@@ -32,13 +34,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            if (!response.ok) throw new Error(data.error || 'Error al agregar');
+            if (!response.ok) {
+                throw new Error(data.error || `Error al agregar (status ${response.status})`);
+            }
 
             limpiarFormulario();
-            cargarBaterias();
+            await cargarBaterias();
             mostrarMensaje('success', 'Batería agregada correctamente');
         } catch (error) {
             mostrarMensaje('error', error.message);
+        }
+    });
+
+    // Delegación de eventos: registrar una vez en tbody
+    tbody.addEventListener('click', async(e) => {
+        const target = e.target;
+        if (target.classList.contains('btn-sumar') || target.classList.contains('btn-disminuir')) {
+            // Buscar la fila que contiene el botón
+            const tr = target.closest('tr');
+            if (!tr) return;
+
+            // Obtener el input dentro de la misma fila
+            const input = tr.querySelector('.input-stock');
+            if (!input) {
+                mostrarMensaje('error', 'No se encontró el campo de cantidad');
+                return;
+            }
+
+            const stock = parseInt(input.value, 10);
+            const id = target.dataset.id;
+            const operacion = target.classList.contains('btn-sumar') ? 'sumar' : 'disminuir';
+
+            if (!validarStock(stock)) return;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5001/api/bateria/${id}/${operacion}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stock: stock })
+                });
+
+                const resultado = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(resultado.error || `Error en la operación (status ${response.status})`);
+                }
+
+                await cargarBaterias();
+                mostrarMensaje('success', `Stock ${operacion === 'sumar' ? 'aumentado' : 'disminuido'} correctamente`);
+            } catch (error) {
+                mostrarMensaje('error', error.message);
+            }
         }
     });
 
@@ -47,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`http://127.0.0.1:5001/api/bateria?marca=${encodeURIComponent(filtro)}`);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-
             const data = await response.json();
             actualizarTabla(data);
         } catch (error) {
@@ -57,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Actualizar tabla con datos
     function actualizarTabla(baterias) {
-        const tbody = document.querySelector('#tabla-baterias tbody');
         tbody.innerHTML = baterias.map(bateria => `
       <tr>
         <td>${escapeHtml(bateria.marca)}</td>
@@ -70,55 +114,24 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
       </tr>
     `).join('');
-
-        // Delegación de eventos para botones
-        tbody.addEventListener('click', async(e) => {
-            const target = e.target;
-            if (target.classList.contains('btn-sumar') || target.classList.contains('btn-disminuir')) {
-                const input = target.previousElementSibling;
-                const stock = parseInt(input.value, 10);
-                const id = target.dataset.id;
-                const operacion = target.classList.contains('btn-sumar') ? 'sumar' : 'disminuir';
-
-                if (!validarCantidad(cantidad)) return;
-
-                try {
-                    const response = await fetch(`http://127.0.0.1:5001/api/bateria/${id}/${operacion}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ stock: stock })
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Error en la operación');
-                    }
-
-                    cargarBaterias();
-                    mostrarMensaje('success', `Stock ${operacion === 'sumar' ? 'aumentado' : 'disminuido'} correctamente`);
-                } catch (error) {
-                    mostrarMensaje('error', error.message);
-                }
-            }
-        });
     }
 
     // Funciones auxiliares
     function validarDatos(marca, modelo, stock) {
         if (!marca || !modelo || isNaN(stock)) {
-            mostrarMensaje('error', 'Todos los campos son requeridos');
+            mostrarMensaje('error', 'Todos los campos son requeridos y stock debe ser numérico');
             return false;
         }
-        if (stock < 0) {
-            mostrarMensaje('error', 'El stock no puede ser negativo');
+        if (!Number.isInteger(stock) || stock < 0) {
+            mostrarMensaje('error', 'El stock debe ser un entero mayor o igual a 0');
             return false;
         }
         return true;
     }
 
     function validarStock(stock) {
-        if (isNaN(stock) || stock < 1) {
-            mostrarMensaje('error', 'Stock inválido (mínimo 1)');
+        if (isNaN(stock) || stock < 1 || !Number.isInteger(stock)) {
+            mostrarMensaje('error', 'Stock inválido (mínimo 1 y entero)');
             return false;
         }
         return true;
