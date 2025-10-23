@@ -79,7 +79,8 @@ function cargarClientes() {
                         alert('ID de cliente no definido.');
                         return;
                     }
-                    if (confirm('¿Eliminar cliente?')) eliminarCliente(id_cliente);
+                    if (confirm('¿Eliminar cliente?')) eliminarCliente(id_cliente), alert('Cliente eliminado.');
+
                 });
             });
         })
