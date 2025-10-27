@@ -36,10 +36,7 @@
                         <tr>
                             <td><label for="marca">Marca</label></td>
                             <td><select name="marca" id="marca-batería">
-                                <option value="moura">Moura</option>
-                                <option value="badia">Badia</option>
-                                <option value="zeta">Zeta</option>
-                                <option value="generica">Generica</option>
+                                <option value="">Cargando marcas...</option>
                             </select></td>
                         </tr>
                         <tr>
@@ -83,6 +80,47 @@
         <p>Copyright 2025 Bateria Badia</p>
         <p>Desarrollado por Emanuel Monella</p>
     </footer>
+
+    <script>
+        // Cargar marcas de baterías al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarMarcasBaterias();
+        });
+
+        async function cargarMarcasBaterias() {
+            try {
+                const response = await fetch('http://localhost:5001/api/bateria/marcas');
+                if (!response.ok) {
+                    throw new Error('Error al cargar las marcas');
+                }
+                
+                const marcas = await response.json();
+                const selectMarca = document.getElementById('marca-batería');
+                
+                // Limpiar opciones existentes
+                selectMarca.innerHTML = '';
+                
+                // Agregar opción por defecto
+                const opcionDefault = document.createElement('option');
+                opcionDefault.value = '';
+                opcionDefault.textContent = 'Seleccione una marca';
+                selectMarca.appendChild(opcionDefault);
+                
+                // Agregar marcas desde la base de datos
+                marcas.forEach(marca => {
+                    const opcion = document.createElement('option');
+                    opcion.value = marca;
+                    opcion.textContent = marca;
+                    selectMarca.appendChild(opcion);
+                });
+                
+            } catch (error) {
+                console.error('Error al cargar marcas:', error);
+                const selectMarca = document.getElementById('marca-batería');
+                selectMarca.innerHTML = '<option value="">Error al cargar marcas</option>';
+            }
+        }
+    </script>
 </body>
 
 </html>

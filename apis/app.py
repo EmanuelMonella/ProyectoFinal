@@ -120,6 +120,18 @@ def disminuir_stock(id):
     except Exception as e:
         return jsonify({'error': f'Error inesperado: {str(e)}'}), 500
 
+@app.route('/api/bateria/marcas', methods=['GET'])
+def obtener_marcas_baterias():
+    """Obtiene todas las marcas únicas de la tabla baterias."""
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT marca FROM bateria ORDER BY marca")
+            marcas = cursor.fetchall()
+            return jsonify([marca['marca'] for marca in marcas])
+    finally:
+        conexion.close()
+
 
 # ===========================
 # ENDPOINTS PARA CLIENTES
