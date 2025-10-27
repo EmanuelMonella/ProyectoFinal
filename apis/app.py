@@ -25,7 +25,7 @@ def obtener_baterias():
     conexion = obtener_conexion()
     try:
         with conexion.cursor() as cursor:
-            sql = "SELECT * FROM bateria" + (" WHERE marca LIKE %s" if marca else "")
+            sql = "SELECT id_bateria as id, marca, modelo, stock FROM bateria" + (" WHERE marca LIKE %s" if marca else "")
             params = ('%' + marca + '%',) if marca else ()
             cursor.execute(sql, params)
             return jsonify(cursor.fetchall())
@@ -76,13 +76,15 @@ def sumar_stock(id):
         with obtener_conexion() as conexion:
             with conexion.cursor() as cursor:
                 cursor.execute(
-                    "UPDATE bateria SET stock = stock + %s WHERE id = %s",
+                    "UPDATE bateria SET stock = stock + %s WHERE id_bateria = %s",
                     (datos['stock'], id)
                 )
                 conexion.commit()
-                return jsonify({'mensaje': 'Stock actualizado'}), 200
+            return jsonify({'mensaje': 'Stock actualizado'}), 200
     except pymysql.Error as e:
         return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': f'Error inesperado: {str(e)}'}), 500
 
 @app.route('/api/bateria/<int:id>/disminuir', methods=['PUT'])
 def disminuir_stock(id):
@@ -93,7 +95,7 @@ def disminuir_stock(id):
 
         with obtener_conexion() as conexion:
             with conexion.cursor() as cursor:
-                cursor.execute("SELECT stock FROM bateria WHERE id = %s", (id,))
+                cursor.execute("SELECT stock FROM bateria WHERE id_bateria = %s", (id,))
                 resultado = cursor.fetchone()
                 
                 if not resultado:
@@ -108,13 +110,15 @@ def disminuir_stock(id):
                 # Disminución segura con protección contra negativos
                 nuevo_stock = actual - datos['stock']
                 cursor.execute(
-                    "UPDATE bateria SET stock = %s WHERE id = %s",
+                    "UPDATE bateria SET stock = %s WHERE id_bateria = %s",
                     (max(nuevo_stock, 0), id)  # Nunca menor a 0
                 )
                 conexion.commit()
-                return jsonify({'mensaje': 'Stock actualizado', 'nuevo_stock': max(nuevo_stock, 0)}), 200
+            return jsonify({'mensaje': 'Stock actualizado', 'nuevo_stock': max(nuevo_stock, 0)}), 200
     except pymysql.Error as e:
         return jsonify({'error': f'Error de base de datos: {str(e)}'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Error inesperado: {str(e)}'}), 500
 
 
 # ===========================
