@@ -150,7 +150,8 @@ form {
 
 /* Sobrescribir el comportamiento global de `form` para el modal */
 
-#form-editar {
+#form-editar,
+#form-editar-proveedor {
     display: flex;
     flex-direction: column;
     /* campos uno debajo del otro */
@@ -174,7 +175,10 @@ form {
 
 #form-editar input[type="text"],
 #form-editar input[type="tel"],
-#form-editar input[type="number"] {
+#form-editar input[type="number"],
+#form-editar-proveedor input[type="text"],
+#form-editar-proveedor input[type="tel"],
+#form-editar-proveedor input[type="number"] {
     width: 100%;
     box-sizing: border-box;
 }
@@ -182,7 +186,8 @@ form {
 
 /* Botones alineados a la derecha y con tamaño más cómodo */
 
-#form-editar button {
+#form-editar button,
+#form-editar-proveedor button {
     min-width: 140px;
     padding: 10px 14px;
     border-radius: 8px;
@@ -195,7 +200,8 @@ form {
 
 /* Si quieres dos botones juntos, mantén pequeño margen entre ellos */
 
-#form-editar button+button {
+#form-editar button+button,
+#form-editar-proveedor button+button {
     margin-left: 8px;
 }
 
@@ -203,11 +209,13 @@ form {
 /* Ajustes para pantallas pequeñas */
 
 @media (max-width: 520px) {
-    #form-editar {
+    #form-editar,
+    #form-editar-proveedor {
         padding: 20px;
         max-width: 92%;
     }
-    #form-editar button {
+    #form-editar button,
+    #form-editar-proveedor button {
         min-width: 120px;
     }
 }

@@ -218,22 +218,103 @@ def eliminar_cliente(id):
     finally:
         conexion.close()
 
+# ===========================
+# ENDPOINTS PARA PROVEEDORES
+# ===========================
+@app.route('/api/proveedor', methods=['GET'])
+def obtener_proveedor():
+    """Obtiene todos los proveedor, con filtro opcional."""
+    busqueda = request.args.get('busqueda')
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            if busqueda:
+                sql = """
+                    SELECT * FROM proveedor 
+                    WHERE nombre LIKE %s 
+                    OR cuit LIKE %s 
+                    OR telefono LIKE %s;
+                """
+                param = f'%{busqueda}%'
+                cursor.execute(sql, (param, param, param))
+            else:
+                cursor.execute("SELECT * FROM proveedor;")
+            proveedor = cursor.fetchall()
+            return jsonify(proveedor)
+    finally:
+        conexion.close()
 
-# ===========================
-# ENDPOINT DE USUARIOS (extra)
-# ===========================
-@app.route('/api/usuarios/<int:usuario_id>', methods=['PUT'])
-def actualizar_email(usuario_id):
-    nuevo_email = request.json.get('email')
-    if not nuevo_email:
-        return jsonify({'error': 'El email es requerido'}), 400
+
+@app.route('/api/proveedor', methods=['POST'])
+def agregar_proveedor():
+    """Agrega un nuevo proveedor a la base de datos."""
+    datos = request.json
+    if not datos or 'nombre' not in datos or 'cuit' not in datos or 'telefono' not in datos:
+        return jsonify({'error': 'Nombre y teléfono son requeridos'}), 400
 
     conexion = obtener_conexion()
     try:
         with conexion.cursor() as cursor:
-            cursor.execute("UPDATE usuarios SET email = %s WHERE id = %s;", (nuevo_email, usuario_id))
+            sql = """
+                INSERT INTO proveedor (nombre, cuit, telefono) 
+                VALUES (%s, %s, %s);
+            """
+            cursor.execute(sql, (
+                datos['nombre'],
+                datos.get('cuit'),
+                datos['telefono'],
+            ))
             conexion.commit()
-            return jsonify({'mensaje': 'Email actualizado exitosamente'})
+            nuevo_id = cursor.lastrowid
+            return jsonify({'mensaje': 'Proveedor agregado exitosamente', 'id_proveedor': nuevo_id}), 201
+    finally:
+        conexion.close()
+
+
+@app.route('/api/proveedor/<int:id>', methods=['PUT'])
+def actualizar_proveedor(id):
+    """Actualiza los datos de un proveedor."""
+    datos = request.json
+    campos_permitidos = ['nombre', 'cuit', 'telefono']
+    actualizaciones = {k: v for k, v in datos.items() if k in campos_permitidos}
+
+    if not actualizaciones:
+        return jsonify({'error': 'No se proporcionaron campos válidos para actualizar'}), 400
+
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            set_clause = ', '.join([f"{k} = %s" for k in actualizaciones.keys()])
+            valores = list(actualizaciones.values()) + [id]
+            sql = f"UPDATE proveedor SET {set_clause} WHERE id_proveedor = %s;"
+            cursor.execute(sql, valores)
+            conexion.commit()
+
+            cursor.execute("SELECT * FROM proveedor WHERE id_proveedor = %s;", (id,))
+            proveedor_actualizado = cursor.fetchone()
+            return jsonify(proveedor_actualizado)
+    except pymysql.Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conexion.close()
+
+
+@app.route('/api/proveedor/<int:id>', methods=['DELETE'])
+def eliminar_proveedor(id):
+    """Elimina un proveedor por su ID."""
+    conexion = obtener_conexion()
+    try:
+        with conexion.cursor() as cursor:
+            cursor.execute("SELECT id_proveedor FROM proveedor WHERE id_proveedor = %s;", (id,))
+            existe = cursor.fetchone()
+            if not existe:
+                return jsonify({'error': 'Proveedor no encontrado'}), 404
+
+            cursor.execute("DELETE FROM proveedor WHERE id_proveedor = %s;", (id,))
+            conexion.commit()
+            return jsonify({'mensaje': 'Proveedor eliminado correctamente'}), 200
+    except pymysql.Error as e:
+        return jsonify({'error': str(e)}), 500
     finally:
         conexion.close()
 

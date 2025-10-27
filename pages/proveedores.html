@@ -33,8 +33,8 @@
 
                 <!-- Filtrado -->
                 <div style="margin-bottom: 1em;">
-                    <input type="text" id="busqueda-proveedores" placeholder="Buscar por nombre o contacto">
-                    <button type="button" id="btn-filtrar-proveedores">Filtrar</button>
+                    <input type="text" id="busqueda-proveedor" placeholder="Buscar por nombre o cuit">
+                    <button type="button" id="btn-filtrar-proveedor">Filtrar</button>
                 </div>
 
                 <!-- Agregar nuevo -->
@@ -42,7 +42,6 @@
                     <input type="text" id="nuevo-nombre" placeholder="Nombre completo*" required>
                     <input type="text" id="nuevo-cuit" placeholder="CUIT (20-XXXXXXXX-X)" pattern="\d{2}-\d{8}-\d">
                     <input type="tel" id="nuevo-telefono" placeholder="Teléfono (3515551234)" pattern="[0-9]{10}">
-
                     <button type="button" id="btn-agregar-proveedor">Agregar Proveedor</button>
                 </div>
 
@@ -82,9 +81,9 @@
         <p>Desarrollado por Emanuel Monella</p>
     </footer>
 
-    <!-- Modal para editar cliente -->
+    <!-- Modal para editar proveedor -->
     <div id="modal-edicion">
-        <form id="form-editar">
+        <form id="form-editar-proveedor">
             <h3>Editar Proveedor</h3>
             <input type="text" id="editar-nombre" placeholder="Nombre completo" required>
             <input type="text" id="editar-cuit" placeholder="CUIT (20-XXXXXXXX-X)" pattern="\d{2}-\d{8}-\d">
@@ -94,7 +93,7 @@
         </form>
     </div>
 
-    <script src="../js/proveedores.js"></script>
+    <script src="../js/proveedor.js"></script>
 </body>
 
 </html>
