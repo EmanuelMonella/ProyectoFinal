@@ -9,16 +9,13 @@ async function cargarMarcasBaterias() {
         const marcas = await response.json();
         const selectMarca = document.getElementById('marca-batería');
         
-        // Limpiar opciones existentes
         selectMarca.innerHTML = '';
         
-        // Agregar opción por defecto
         const opcionDefault = document.createElement('option');
         opcionDefault.value = '';
         opcionDefault.textContent = 'Seleccione una marca';
         selectMarca.appendChild(opcionDefault);
         
-        // Agregar marcas desde la base de datos
         marcas.forEach(marca => {
             const opcion = document.createElement('option');
             opcion.value = marca;
@@ -33,11 +30,9 @@ async function cargarMarcasBaterias() {
     }
 }
 
-// Función para cargar modelos según la marca seleccionada
 async function cargarModelosPorMarca(marca) {
     const selectModelo = document.getElementById('modelo-bateria');
     
-    // Limpiar opciones existentes
     selectModelo.innerHTML = '<option value="">Cargando modelos...</option>';
     
     if (!marca) {
@@ -54,17 +49,14 @@ async function cargarModelosPorMarca(marca) {
         
         const modelos = await response.json();
         
-        // Limpiar opciones existentes
         selectModelo.innerHTML = '';
         selectModelo.disabled = false;
         
-        // Agregar opción por defecto
         const opcionDefault = document.createElement('option');
         opcionDefault.value = '';
         opcionDefault.textContent = 'Seleccione un modelo';
         selectModelo.appendChild(opcionDefault);
         
-        // Agregar modelos desde la base de datos
         modelos.forEach(modelo => {
             const opcion = document.createElement('option');
             opcion.value = modelo.modelo;
@@ -80,19 +72,15 @@ async function cargarModelosPorMarca(marca) {
     }
 }
 
-// Función para manejar el envío del formulario
 async function registrarVenta(event) {
-    event.preventDefault(); // Prevenir el envío tradicional del formulario
+    event.preventDefault();
     
     const marca = document.getElementById('marca-batería').value;
     const modelo = document.getElementById('modelo-bateria').value;
     const cantidad = parseInt(document.getElementById('cantidad-bateria').value);
     const clienteSelect = document.getElementById('cliente-select');
     const idCliente = clienteSelect ? parseInt(clienteSelect.value || '') : null;
-    // Campo de comentario fue reemplazado por forma de cobro en el HTML; no es requerido por el backend
-    // Mantenemos la lógica sin enviar comentario
     
-    // Validaciones
     if (!marca || !modelo || !cantidad) {
         alert('Por favor complete todos los campos requeridos (Marca, Modelo y Cantidad)');
         return;
@@ -103,7 +91,6 @@ async function registrarVenta(event) {
         return;
     }
     
-    // Verificar stock
     const selectModelo = document.getElementById('modelo-bateria');
     const opcionSeleccionada = selectModelo.options[selectModelo.selectedIndex];
     const stockDisponible = parseInt(opcionSeleccionada.dataset.stock);
@@ -134,19 +121,15 @@ async function registrarVenta(event) {
             return;
         }
         
-        // Mostrar mensaje de éxito
         alert(`Venta registrada exitosamente!\nID de venta: ${resultado.id_venta}\nStock restante: ${resultado.stock_restante}`);
         
-        // Limpiar el formulario
         document.getElementById('marca-batería').value = '';
         cargarModelosPorMarca('');
         document.getElementById('cantidad-bateria').value = '';
         if (document.getElementById('cliente-select')) {
             document.getElementById('cliente-select').value = '';
         }
-        // No hay comentario que limpiar
-        
-        // Recargar marcas para actualizar stocks
+
         cargarMarcasBaterias();
         
     } catch (error) {
@@ -155,7 +138,6 @@ async function registrarVenta(event) {
     }
 }
 
-// Función para descartar el formulario
 function descartarVenta() {
     if (confirm('¿Está seguro que desea descartar esta venta?')) {
         document.getElementById('marca-batería').value = '';
@@ -164,30 +146,24 @@ function descartarVenta() {
         if (document.getElementById('cliente-select')) {
             document.getElementById('cliente-select').value = '';
         }
-        // No hay comentario que limpiar
     }
 }
 
-// Inicialización cuando se carga la página
 document.addEventListener('DOMContentLoaded', function() {
     cargarMarcasBaterias();
     cargarClientes();
     
-    // Event listener para cargar modelos cuando se seleccione una marca
     const selectMarca = document.getElementById('marca-batería');
     selectMarca.addEventListener('change', function() {
         cargarModelosPorMarca(this.value);
     });
     
-    // Event listener para el formulario
     const formulario = document.querySelector('form');
     formulario.addEventListener('submit', registrarVenta);
     
-    // Event listener para el botón descartar
     const btnDescartar = document.querySelector('input[value="Descartar"]');
     btnDescartar.addEventListener('click', descartarVenta);
 
-    // Buscador con debounce para clientes
     const inputBuscar = document.getElementById('cliente-buscar');
     if (inputBuscar) {
         const debounced = debounce(async () => {
@@ -197,7 +173,6 @@ document.addEventListener('DOMContentLoaded', function() {
         inputBuscar.addEventListener('input', debounced);
     }
 });
-// Cargar clientes desde la API y poblar el select
 async function cargarClientes() {
     try {
         const res = await fetch('http://localhost:5001/api/clientes');
@@ -226,7 +201,6 @@ async function cargarClientes() {
     }
 }
 
-// Debounce helper
 function debounce(fn, delay) {
     let t;
     return function(...args) {

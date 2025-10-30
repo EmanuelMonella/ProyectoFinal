@@ -3,16 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAgregar = document.getElementById('btn-agregar');
     const tbody = document.querySelector('#tabla-baterias tbody');
 
-    // Cargar datos iniciales
     cargarBaterias();
 
-    // Evento para filtrar
     btnFiltrar.addEventListener('click', () => {
         const filtro = document.getElementById('busqueda-nombre').value;
         cargarBaterias(filtro);
     });
-
-    // Evento para agregar nueva batería
+        
     btnAgregar.addEventListener('click', async() => {
         const marca = document.getElementById('nuevo-marca').value.trim();
         const modelo = document.getElementById('nuevo-modelo').value.trim();
@@ -52,15 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Delegación de eventos: registrar una vez en tbody
     tbody.addEventListener('click', async(e) => {
         const target = e.target;
         if (target.classList.contains('btn-sumar') || target.classList.contains('btn-disminuir')) {
-            // Buscar la fila que contiene el botón
             const tr = target.closest('tr');
             if (!tr) return;
 
-            // Obtener el input dentro de la misma fila
             const input = tr.querySelector('.input-stock');
             if (!input) {
                 mostrarMensaje('error', 'No se encontró el campo de cantidad');
@@ -94,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Función principal para cargar datos
     async function cargarBaterias(filtro = '') {
         try {
             const response = await fetch(`http://localhost:5001/api/bateria?marca=${encodeURIComponent(filtro)}`);
@@ -106,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Actualizar tabla con datos
     function actualizarTabla(baterias) {
         tbody.innerHTML = baterias.map(bateria => `
       <tr>
@@ -122,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
     `).join('');
     }
 
-    // Funciones auxiliares
     function validarDatos(marca, modelo, stock, precio_compra, precio_venta) {
         if (!marca || !modelo || isNaN(stock) || precio_compra === undefined || precio_venta === undefined) {
             mostrarMensaje('error', 'Todos los campos son requeridos (incluye precios)');

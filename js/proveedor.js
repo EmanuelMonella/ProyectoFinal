@@ -1,6 +1,5 @@
 let proveedorEditId = null;
 
-// Función para asegurar que la tabla tenga un encabezado con 'ID'
 function asegurarEncabezado() {
     const table = document.getElementById('tabla-proveedores');
     if (!table) return;
@@ -28,7 +27,6 @@ function asegurarEncabezado() {
     }
 }
 
-// Cargar proveedores desde la API
 function cargarProveedores() {
     asegurarEncabezado();
 
@@ -59,7 +57,6 @@ function cargarProveedores() {
                 tbody.appendChild(tr);
             });
 
-            // Asignar eventos después de renderizar
             document.querySelectorAll('.btn-editar').forEach(btn => {
                 btn.addEventListener('click', function() {
                         const id_proveedor = this.dataset.id;
@@ -89,9 +86,7 @@ function cargarProveedores() {
         .catch(err => console.error(err));
 }
 
-// Función para abrir el modal de edición
 function abrirModalEdicion(id_proveedor) {
-    // Obtener datos del cliente y abrir modal con valores
     fetch(`http://localhost:5001/api/proveedor`)
         .then(res => {
             if (!res.ok) throw new Error('Error al obtener proveedores');
@@ -117,14 +112,12 @@ function abrirModalEdicion(id_proveedor) {
         .catch(err => console.error(err));
 }
 
-// Función global llamada desde el HTML onclick
 function cerrarModal() {
     proveedorEditId = null;
     const modal = document.getElementById('modal-edicion');
     if (modal) modal.style.display = 'none';
 }
 
-// Función para eliminar un cliente
 function eliminarProveedor(id_proveedor) {
     fetch(`http://localhost:5001/api/proveedor/${id_proveedor}`, {
             method: 'DELETE'
@@ -136,7 +129,6 @@ function eliminarProveedor(id_proveedor) {
         .catch(err => console.error(err));
 }
 
-// Función para agregar un cliente
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modal-edicion');
     if (modal) modal.style.display = 'none';
@@ -156,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Agregar proveedor
 const btnAgregar = document.getElementById('btn-agregar-proveedor');
     if (btnAgregar) {
         btnAgregar.addEventListener('click', () => {
@@ -179,7 +170,6 @@ const btnAgregar = document.getElementById('btn-agregar-proveedor');
                     return res.json();
                 })
                 .then(() => {
-                    // Limpiar campos y recargar tabla
                     document.getElementById('nuevo-nombre').value = '';
                     document.getElementById('nuevo-cuit').value = '';
                     document.getElementById('nuevo-telefono').value = '';
@@ -189,14 +179,12 @@ const btnAgregar = document.getElementById('btn-agregar-proveedor');
         });
     }
 
-    // Submit del formulario de edición
     const formEditar = document.getElementById('form-editar-proveedor');
     if (formEditar) {
         formEditar.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!proveedorEditId) return alert('ID de proveedor no definido.');
 
-            // Obtener valores de los campos
             const nombre = document.getElementById('editar-nombre').value.trim();
             const cuit = document.getElementById('editar-cuit').value.trim();
             const telefono = document.getElementById('editar-telefono').value.trim();
@@ -205,7 +193,6 @@ const btnAgregar = document.getElementById('btn-agregar-proveedor');
                 return alert('El nombre es obligatorio.');
             }
 
-            // Enviar solicitud PUT para actualizar el cliente
             fetch(`http://localhost:5001/api/proveedor/${proveedorEditId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -226,12 +213,10 @@ const btnAgregar = document.getElementById('btn-agregar-proveedor');
         });
     }
 
-    // Cerrar modal al hacer click fuera del contenido
     window.addEventListener('click', (e) => {
         const modal = document.getElementById('modal-edicion');
         if (e.target === modal) cerrarModal();
     });
 });
 
-// Exponer cerrarModal globalmente
 window.cerrarModal = cerrarModal;

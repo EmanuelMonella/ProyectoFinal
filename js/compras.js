@@ -1,13 +1,11 @@
-// Debounce helper
-function debounce(fn, delay) {
-    let t;
-    return function(...args) {
-        clearTimeout(t);
-        t = setTimeout(() => fn.apply(this, args), delay);
-    };
-}
+//function debounce(fn, delay) {
+//    let t;
+//    return function(...args) {
+//        clearTimeout(t);
+//        t = setTimeout(() => fn.apply(this, args), delay);
+//    };
+//}
 
-// Poblar select de proveedores
 function poblarSelectProveedores(proveedores) {
     const sel = document.getElementById('proveedor-select');
     if (!sel) return;
@@ -53,7 +51,6 @@ async function buscarYRenderizarProveedores(termino) {
 document.addEventListener('DOMContentLoaded', () => {
     cargarProveedoresInicial();
 
-    // Cargar marcas de baterías y configurar dependencias de modelo
     cargarMarcasBaterias();
     const selectMarca = document.getElementById('marca-batería');
     if (selectMarca) {
@@ -62,13 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Manejar submit de compra
     const formulario = document.querySelector('form');
     if (formulario) {
         formulario.addEventListener('submit', registrarCompra);
     }
 
-    // Botón descartar
     const btnDescartar = document.querySelector('input[value="Descartar"]');
     if (btnDescartar) {
         btnDescartar.addEventListener('click', descartarCompra);
@@ -84,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Cargar marcas (igual que en ventas)
 async function cargarMarcasBaterias() {
     try {
         const response = await fetch('http://localhost:5001/api/bateria/marcas');
@@ -110,7 +104,6 @@ async function cargarMarcasBaterias() {
     }
 }
 
-// Cargar modelos según marca
 async function cargarModelosPorMarca(marca) {
     const selectModelo = document.getElementById('modelo-bateria');
     if (!selectModelo) return;
@@ -142,8 +135,7 @@ async function cargarModelosPorMarca(marca) {
         selectModelo.disabled = true;
     }
 }
-
-// Registrar compra
+            
 async function registrarCompra(event) {
     event.preventDefault();
     const marca = document.getElementById('marca-batería')?.value;

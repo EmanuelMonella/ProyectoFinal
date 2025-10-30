@@ -1,6 +1,5 @@
 let clienteEditId = null;
 
-// Función para asegurar que la tabla tenga un encabezado con 'ID'
 function asegurarEncabezado() {
     const table = document.getElementById('tabla-clientes');
     if (!table) return;
@@ -28,7 +27,6 @@ function asegurarEncabezado() {
     }
 }
 
-// Cargar clientes desde la API
 function cargarClientes() {
     asegurarEncabezado();
 
@@ -60,7 +58,6 @@ function cargarClientes() {
                 tbody.appendChild(tr);
             });
 
-            // Asignar eventos después de renderizar
             document.querySelectorAll('.btn-editar').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id_cliente = this.dataset.id;
@@ -87,9 +84,8 @@ function cargarClientes() {
         .catch(err => console.error(err));
 }
 
-// Función para abrir el modal de edición
+
 function abrirModalEdicion(id_cliente) {
-    // Obtener datos del cliente y abrir modal con valores
     fetch(`http://127.0.0.1:5001/api/clientes`)
         .then(res => {
             if (!res.ok) throw new Error('Error al obtener clientes');
@@ -117,14 +113,12 @@ function abrirModalEdicion(id_cliente) {
         .catch(err => console.error(err));
 }
 
-// Función global llamada desde el HTML onclick
 function cerrarModal() {
     clienteEditId = null;
     const modal = document.getElementById('modal-edicion');
     if (modal) modal.style.display = 'none';
 }
 
-// Función para eliminar un cliente
 function eliminarCliente(id_cliente) {
     fetch(`http://127.0.0.1:5001/api/clientes/${id_cliente}`, {
             method: 'DELETE'
@@ -136,7 +130,6 @@ function eliminarCliente(id_cliente) {
         .catch(err => console.error(err));
 }
 
-// Función para agregar un cliente
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modal-edicion');
     if (modal) modal.style.display = 'none';
@@ -156,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Agregar cliente
     const btnAgregar = document.getElementById('btn-agregar-cliente');
     if (btnAgregar) {
         btnAgregar.addEventListener('click', () => {
@@ -180,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     return res.json();
                 })
                 .then(() => {
-                    // Limpiar campos y recargar tabla
                     document.getElementById('nuevo-nombre').value = '';
                     document.getElementById('nuevo-vehiculo').value = '';
                     document.getElementById('nuevo-telefono').value = '';
@@ -191,14 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Submit del formulario de edición
     const formEditar = document.getElementById('form-editar');
     if (formEditar) {
         formEditar.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!clienteEditId) return alert('ID de cliente no definido.');
 
-            // Obtener valores de los campos
             const nombre = document.getElementById('editar-nombre').value.trim();
             const vehiculo = document.getElementById('editar-vehiculo').value.trim();
             const telefono = document.getElementById('editar-telefono').value.trim();
@@ -208,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return alert('El nombre es obligatorio.');
             }
 
-            // Enviar solicitud PUT para actualizar el cliente
             fetch(`http://127.0.0.1:5001/api/clientes/${clienteEditId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -229,12 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Cerrar modal al hacer click fuera del contenido
     window.addEventListener('click', (e) => {
         const modal = document.getElementById('modal-edicion');
         if (e.target === modal) cerrarModal();
     });
 });
 
-// Exponer cerrarModal globalmente
 window.cerrarModal = cerrarModal;
