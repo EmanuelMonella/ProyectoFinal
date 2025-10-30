@@ -17,7 +17,7 @@ def obtener_conexion():
     )
 
 # ===========================
-# ENDPOINTS PARA BATERÍAS
+# ENDPOINTS PARA BATERIAS
 # ===========================
 @app.route('/api/bateria', methods=['GET'])
 def obtener_baterias():
