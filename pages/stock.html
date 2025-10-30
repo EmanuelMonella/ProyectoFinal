@@ -24,13 +24,14 @@
                 <li><a href="compras.html">Compras</a></li>
                 <li><a href="ventas.html">Ventas</a></li>
                 <li><a href="reporte.html">Reportes</a></li>
+                <li><a href="clientes.html">Clientes</a></li>
+                <li><a href="proveedores.html">Proveedores</a></li>
                 <li><a href="stock.html">Stock</a></li>
             </ul>
         </nav>
-
         <main>
             <section class="centrado">
-                <h2 id="titulo-pagina">Gestión de Stock:</h2>
+                <h2 id="titulo-pagina">Reportes:</h2>
                 <div style="margin-bottom: 1em;">
                     <input type="text" id="busqueda-nombre" placeholder="Buscar por marca">
                     <button type="button" id="btn-filtrar">Filtrar</button>
@@ -39,6 +40,8 @@
                     <input type="text" id="nuevo-marca" placeholder="Agregar por marca">
                     <input type="text" id="nuevo-modelo" placeholder="Agregar por modelo">
                     <input type="number" id="nuevo-stock" placeholder="Agregar por stock" min="0">
+                    <input type="number" id="nuevo-precio-compra" placeholder="Precio compra" min="0" step="0.01">
+                    <input type="number" id="nuevo-precio-venta" placeholder="Precio venta" min="0" step="0.01">
                     <button type="button" id="btn-agregar">Agregar</button>
                 </div>
                 <div>

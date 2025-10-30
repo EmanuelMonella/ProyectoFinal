@@ -25,6 +25,7 @@
                 <li><a href="reporte.html">Reportes</a></li>
                 <li><a href="clientes.html">Clientes</a></li>
                 <li><a href="proveedores.html">Proveedores</a></li>
+                <li><a href="stock.html">Stock</a></li>
             </ul>
         </nav>
         <main>
@@ -41,19 +42,26 @@
                         </tr>
                         <tr>
                             <td><label for="modelo">Modelo: </label></td>
-                            <td><input type="text" placeholder="Ingrese el amperaje"></td>
+                            <td><select name="modelo" id="modelo-bateria" disabled>
+                                <option value="">Seleccione primero una marca</option>
+                            </select></td>
                         </tr>
                         <tr>
                             <td><label for="cantidad">Cantidad</label></td>
                             <td><input type="number" id="cantidad-bateria" name="cantidad"></td>
                         </tr>
                         <tr>
-                            <td><label for="cliente">Cliente</label></td>
-                            <td><input type="text" id="cliente" name="cliente" placeholder="Ingrese un nombre de cliente"></td>
+                            <td><label for="cliente-buscar">Cliente</label></td>
+                            <td>
+                                <input type="text" id="cliente-buscar" placeholder="Buscar cliente por nombre/vehículo/teléfono">
+                                <select id="cliente-select" name="cliente" style="margin-top:6px; width:100%;">
+                                    <option value="">Cargando clientes...</option>
+                                </select>
+                            </td>
                         </tr>
                         <tr>
                             <td><label for="comentario">Comentario</label></td>
-                            <td><textarea id="comentario" name="comentario" minlength="10"></textarea></td>
+                            <td><textarea id="comentario" name="comentario"></textarea></td>
                         </tr>
                         <tr>
                             <td><input type="submit" value="Enviar"></td>
@@ -81,46 +89,7 @@
         <p>Desarrollado por Emanuel Monella</p>
     </footer>
 
-    <script>
-        // Cargar marcas de baterías al cargar la página
-        document.addEventListener('DOMContentLoaded', function() {
-            cargarMarcasBaterias();
-        });
-
-        async function cargarMarcasBaterias() {
-            try {
-                const response = await fetch('http://localhost:5001/api/bateria/marcas');
-                if (!response.ok) {
-                    throw new Error('Error al cargar las marcas');
-                }
-                
-                const marcas = await response.json();
-                const selectMarca = document.getElementById('marca-batería');
-                
-                // Limpiar opciones existentes
-                selectMarca.innerHTML = '';
-                
-                // Agregar opción por defecto
-                const opcionDefault = document.createElement('option');
-                opcionDefault.value = '';
-                opcionDefault.textContent = 'Seleccione una marca';
-                selectMarca.appendChild(opcionDefault);
-                
-                // Agregar marcas desde la base de datos
-                marcas.forEach(marca => {
-                    const opcion = document.createElement('option');
-                    opcion.value = marca;
-                    opcion.textContent = marca;
-                    selectMarca.appendChild(opcion);
-                });
-                
-            } catch (error) {
-                console.error('Error al cargar marcas:', error);
-                const selectMarca = document.getElementById('marca-batería');
-                selectMarca.innerHTML = '<option value="">Error al cargar marcas</option>';
-            }
-        }
-    </script>
+    <script src="../js/ventas.js"></script>
 </body>
 
 </html>

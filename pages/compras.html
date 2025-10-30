@@ -25,34 +25,39 @@
                 <li><a href="reporte.html">Reportes</a></li>
                 <li><a href="clientes.html">Clientes</a></li>
                 <li><a href="proveedores.html">Proveedores</a></li>
+                <li><a href="stock.html">Stock</a></li>
             </ul>
         </nav>
         <main>
             <section>
-                <h2 id="titulo-pagina">Ventas:</h2>
+                <h2 id="titulo-pagina">Compras:</h2>
                 <form action="#" method="get">
                     <table>
                         <caption>Contacto</caption>
                         <tr>
                             <td><label for="marca">Marca</label></td>
                             <td><select name="marca" id="marca-batería">
-                                <option value="moura">Moura</option>
-                                <option value="badia">Badia</option>
-                                <option value="zeta">Zeta</option>
-                                <option value="generica">Generica</option>
+                                <option value="">Cargando marcas...</option>
                             </select></td>
                         </tr>
                         <tr>
                             <td><label for="modelo">Modelo: </label></td>
-                            <td><input type="text" placeholder="Ingrese el amperaje"></td>
+                            <td><select name="modelo" id="modelo-bateria" disabled>
+                                <option value="">Seleccione primero una marca</option>
+                            </select></td>
                         </tr>
                         <tr>
                             <td><label for="cantidad">Cantidad</label></td>
                             <td><input type="number" id="cantidad-bateria" name="cantidad"></td>
                         </tr>
                         <tr>
-                            <td><label for="cliente">Cliente</label></td>
-                            <td><input type="text" id="cliente" name="cliente" placeholder="Ingrese un nombre de cliente"></td>
+                            <td><label for="proveedor-buscar">Proveedor</label></td>
+                            <td>
+                                <input type="text" id="proveedor-buscar" placeholder="Buscar proveedor por nombre/cuit/teléfono">
+                                <select id="proveedor-select" name="proveedor" style="margin-top:6px; width:100%;">
+                                    <option value="">Cargando proveedores...</option>
+                                </select>
+                            </td>
                         </tr>
                         <tr>
                             <td><label for="comentario">Comentario</label></td>
@@ -83,6 +88,8 @@
         <p>Copyright 2025 Bateria Badia</p>
         <p>Desarrollado por Emanuel Monella</p>
     </footer>
+
+    <script src="../js/compras.js"></script>
 </body>
 
 </html>

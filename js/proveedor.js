@@ -32,7 +32,7 @@ function asegurarEncabezado() {
 function cargarProveedores() {
     asegurarEncabezado();
 
-    fetch('http://127.0.0.1:5001/api/proveedor')
+    fetch('http://localhost:5001/api/proveedor')
         .then(res => {
             if (!res.ok) throw new Error('Error al obtener proveedores');
             return res.json();
@@ -92,7 +92,7 @@ function cargarProveedores() {
 // Función para abrir el modal de edición
 function abrirModalEdicion(id_proveedor) {
     // Obtener datos del cliente y abrir modal con valores
-    fetch(`http://127.0.0.1:5001/api/proveedor`)
+    fetch(`http://localhost:5001/api/proveedor`)
         .then(res => {
             if (!res.ok) throw new Error('Error al obtener proveedores');
             return res.json();
@@ -126,7 +126,7 @@ function cerrarModal() {
 
 // Función para eliminar un cliente
 function eliminarProveedor(id_proveedor) {
-    fetch(`http://127.0.0.1:5001/api/proveedor/${id_proveedor}`, {
+    fetch(`http://localhost:5001/api/proveedor/${id_proveedor}`, {
             method: 'DELETE'
         })
         .then(res => {
@@ -169,7 +169,7 @@ const btnAgregar = document.getElementById('btn-agregar-proveedor');
                 return;
             }
 
-            fetch('http://127.0.0.1:5001/api/proveedor', {
+            fetch('http://localhost:5001/api/proveedor', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nombre, cuit, telefono })
@@ -206,7 +206,7 @@ const btnAgregar = document.getElementById('btn-agregar-proveedor');
             }
 
             // Enviar solicitud PUT para actualizar el cliente
-            fetch(`http://127.0.0.1:5001/api/proveedor/${proveedorEditId}`, {
+            fetch(`http://localhost:5001/api/proveedor/${proveedorEditId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nombre, cuit, telefono })

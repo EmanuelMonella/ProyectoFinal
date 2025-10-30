@@ -17,18 +17,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const marca = document.getElementById('nuevo-marca').value.trim();
         const modelo = document.getElementById('nuevo-modelo').value.trim();
         const stockRaw = document.getElementById('nuevo-stock').value;
+        const precioCompraRaw = document.getElementById('nuevo-precio-compra')?.value;
+        const precioVentaRaw = document.getElementById('nuevo-precio-venta')?.value;
         const stock = parseInt(stockRaw, 10);
+        const precio_compra = precioCompraRaw !== undefined ? parseFloat(precioCompraRaw) : undefined;
+        const precio_venta = precioVentaRaw !== undefined ? parseFloat(precioVentaRaw) : undefined;
 
-        if (!validarDatos(marca, modelo, stock)) return;
+        if (!validarDatos(marca, modelo, stock, precio_compra, precio_venta)) return;
 
         try {
-            const response = await fetch('http://127.0.0.1:5001/api/bateria', {
+            const response = await fetch('http://localhost:5001/api/bateria', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     marca: marca,
                     modelo: modelo,
-                    stock: stock
+                    stock: stock,
+                    precio_compra: precio_compra,
+                    precio_venta: precio_venta
                 })
             });
 
@@ -68,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!validarStock(stock)) return;
 
             try {
-                const response = await fetch(`http://127.0.0.1:5001/api/bateria/${id}/${operacion}`, {
+                const response = await fetch(`http://localhost:5001/api/bateria/${id}/${operacion}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ stock: stock })
@@ -91,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función principal para cargar datos
     async function cargarBaterias(filtro = '') {
         try {
-            const response = await fetch(`http://127.0.0.1:5001/api/bateria?marca=${encodeURIComponent(filtro)}`);
+            const response = await fetch(`http://localhost:5001/api/bateria?marca=${encodeURIComponent(filtro)}`);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const data = await response.json();
             actualizarTabla(data);
@@ -117,13 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Funciones auxiliares
-    function validarDatos(marca, modelo, stock) {
-        if (!marca || !modelo || isNaN(stock)) {
-            mostrarMensaje('error', 'Todos los campos son requeridos y stock debe ser numérico');
+    function validarDatos(marca, modelo, stock, precio_compra, precio_venta) {
+        if (!marca || !modelo || isNaN(stock) || precio_compra === undefined || precio_venta === undefined) {
+            mostrarMensaje('error', 'Todos los campos son requeridos (incluye precios)');
             return false;
         }
         if (!Number.isInteger(stock) || stock < 0) {
             mostrarMensaje('error', 'El stock debe ser un entero mayor o igual a 0');
+            return false;
+        }
+        if (isNaN(precio_compra) || isNaN(precio_venta) || precio_compra < 0 || precio_venta < 0) {
+            mostrarMensaje('error', 'Los precios deben ser números mayores o iguales a 0');
             return false;
         }
         return true;
@@ -141,6 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('nuevo-marca').value = '';
         document.getElementById('nuevo-modelo').value = '';
         document.getElementById('nuevo-stock').value = '';
+        const pc = document.getElementById('nuevo-precio-compra');
+        const pv = document.getElementById('nuevo-precio-venta');
+        if (pc) pc.value = '';
+        if (pv) pv.value = '';
     }
 
     function escapeHtml(unsafe) {
