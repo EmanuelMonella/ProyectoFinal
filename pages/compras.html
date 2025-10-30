@@ -32,8 +32,7 @@
             <section>
                 <h2 id="titulo-pagina">Compras:</h2>
                 <form action="#" method="get">
-                    <table>
-                        <caption>Contacto</caption>
+                    <table class="tabla">
                         <tr>
                             <td><label for="marca">Marca</label></td>
                             <td><select name="marca" id="marca-batería">
@@ -60,8 +59,12 @@
                             </td>
                         </tr>
                         <tr>
-                            <td><label for="comentario">Comentario</label></td>
-                            <td><textarea id="comentario" name="comentario" minlength="10"></textarea></td>
+                            <td><label for="comentario">Forma de pago</label></td>
+                            <td><select name="forma-pago" id="forma-pago">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="tarjeta">Tarjeta</option>
+                                <option value="transferencia">Transferencia</option>
+                            </select></td>
                         </tr>
                         <tr>
                             <td><input type="submit" value="Enviar"></td>

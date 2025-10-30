@@ -89,7 +89,8 @@ async function registrarVenta(event) {
     const cantidad = parseInt(document.getElementById('cantidad-bateria').value);
     const clienteSelect = document.getElementById('cliente-select');
     const idCliente = clienteSelect ? parseInt(clienteSelect.value || '') : null;
-    const comentario = document.getElementById('comentario').value;
+    // Campo de comentario fue reemplazado por forma de cobro en el HTML; no es requerido por el backend
+    // Mantenemos la lógica sin enviar comentario
     
     // Validaciones
     if (!marca || !modelo || !cantidad) {
@@ -122,8 +123,7 @@ async function registrarVenta(event) {
                 marca,
                 modelo,
                 cantidad,
-                id_cliente: Number.isNaN(idCliente) ? null : idCliente,
-                comentario: comentario || null
+                id_cliente: Number.isNaN(idCliente) ? null : idCliente
             })
         });
         
@@ -144,7 +144,7 @@ async function registrarVenta(event) {
         if (document.getElementById('cliente-select')) {
             document.getElementById('cliente-select').value = '';
         }
-        document.getElementById('comentario').value = '';
+        // No hay comentario que limpiar
         
         // Recargar marcas para actualizar stocks
         cargarMarcasBaterias();
@@ -164,7 +164,7 @@ function descartarVenta() {
         if (document.getElementById('cliente-select')) {
             document.getElementById('cliente-select').value = '';
         }
-        document.getElementById('comentario').value = '';
+        // No hay comentario que limpiar
     }
 }
 
