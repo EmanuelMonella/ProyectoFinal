@@ -118,11 +118,10 @@ def disminuir_stock(id):
                         'error': f'Stock insuficiente (actual: {actual}, requerido: {datos["stock"]})'
                     }), 400
                 
-                # Disminución segura con protección contra negativos
                 nuevo_stock = actual - datos['stock']
                 cursor.execute(
                     "UPDATE bateria SET stock = %s WHERE id_bateria = %s",
-                    (max(nuevo_stock, 0), id)  # Nunca menor a 0
+                    (max(nuevo_stock, 0), id)  
                 )
                 conexion.commit()
             return jsonify({'mensaje': 'Stock actualizado', 'nuevo_stock': max(nuevo_stock, 0)}), 200
@@ -308,7 +307,6 @@ def registrar_venta():
         
         with obtener_conexion() as conexion:
             with conexion.cursor() as cursor:
-                # Buscar la batería por marca y modelo
                 cursor.execute(
                     "SELECT id_bateria, stock, precio_venta FROM bateria WHERE marca = %s AND modelo = %s",
                     (datos['marca'], datos['modelo'])
@@ -318,13 +316,11 @@ def registrar_venta():
                 if not bateria:
                     return jsonify({'error': 'Batería no encontrada'}), 404
                 
-                # Verificar si hay stock suficiente
                 if bateria['stock'] < datos['cantidad']:
                     return jsonify({
                         'error': f'Stock insuficiente (disponible: {bateria["stock"]}, solicitado: {datos["cantidad"]})'
                     }), 400
                 
-                # Crear la venta (fecha y total). 'fecha' es DATE en el esquema.
                 total = bateria['precio_venta'] * datos['cantidad']
                 cursor.execute(
                     "INSERT INTO Venta (fecha, total, id_cliente) VALUES (CURDATE(), %s, %s)",
@@ -332,7 +328,6 @@ def registrar_venta():
                 )
                 venta_id = cursor.lastrowid
 
-                # Insertar ítem de la transacción
                 cursor.execute(
                     """
                     INSERT INTO ItemTransaccion (id_bateria, id_venta, id_compra, cantidad, precio_unitario)
@@ -462,8 +457,6 @@ def registrar_compra():
     """Registra una nueva compra y aumenta el stock de la batería."""
     try:
         datos = request.get_json()
-
-        # Validaciones mínimas
         if not datos or 'marca' not in datos or 'modelo' not in datos:
             return jsonify({'error': 'Marca y modelo son requeridos'}), 400
 
@@ -475,7 +468,6 @@ def registrar_compra():
 
         with obtener_conexion() as conexion:
             with conexion.cursor() as cursor:
-                # Buscar batería por marca y modelo
                 cursor.execute(
                     "SELECT id_bateria, stock, precio_compra FROM bateria WHERE marca = %s AND modelo = %s",
                     (datos['marca'], datos['modelo'])
@@ -485,7 +477,6 @@ def registrar_compra():
                 if not bateria:
                     return jsonify({'error': 'Batería no encontrada. Cree la batería en Stock primero.'}), 404
 
-                # Crear compra (fecha y total). Usamos precio_compra de la batería.
                 precio_unitario = bateria['precio_compra'] if bateria['precio_compra'] is not None else 0.0
                 total = precio_unitario * datos['cantidad']
 
@@ -494,8 +485,6 @@ def registrar_compra():
                     (total, id_proveedor)
                 )
                 compra_id = cursor.lastrowid
-
-                # Insertar ítem de transacción como compra
                 cursor.execute(
                     """
                     INSERT INTO ItemTransaccion (id_bateria, id_venta, id_compra, cantidad, precio_unitario)
@@ -503,8 +492,6 @@ def registrar_compra():
                     """,
                     (bateria['id_bateria'], compra_id, datos['cantidad'], precio_unitario)
                 )
-
-                # Aumentar stock
                 cursor.execute(
                     "UPDATE bateria SET stock = stock + %s WHERE id_bateria = %s",
                     (datos['cantidad'], bateria['id_bateria'])
