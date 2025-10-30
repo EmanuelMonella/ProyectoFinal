@@ -1,4 +1,3 @@
-// Función para cargar marcas de baterías al cargar la página
 async function cargarMarcasBaterias() {
     try {
         const response = await fetch('http://localhost:5001/api/bateria/marcas');
