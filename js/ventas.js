@@ -120,7 +120,7 @@ async function registrarVenta(event) {
             return;
         }
         
-        alert(`Venta registrada exitosamente!\nID de venta: ${resultado.id_venta}\nStock restante: ${resultado.stock_restante}`);
+        alert(`Venta registrada exitosamente!\nID de venta: ${resultado.id_venta}\nTotal: $${Number(resultado.total).toFixed(2)}\nStock restante: ${resultado.stock_restante}`);
         
         document.getElementById('marca-batería').value = '';
         cargarModelosPorMarca('');
@@ -216,6 +216,14 @@ async function buscarYRenderizarClientes(termino) {
         if (!res.ok) throw new Error('Error al buscar clientes');
         const clientes = await res.json();
         poblarSelectClientes(clientes);
+
+        // Si hubo término de búsqueda y no hay coincidencias, ofrecer redirigir al registro
+        if (termino && termino.trim() !== '' && Array.isArray(clientes) && clientes.length === 0) {
+            const ir = confirm('No se encontraron clientes con ese criterio. ¿Desea registrar uno nuevo ahora?');
+            if (ir) {
+                window.location.href = 'clientes.html';
+            }
+        }
     } catch (e) {
         console.error(e);
     }

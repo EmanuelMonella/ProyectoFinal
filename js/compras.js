@@ -43,6 +43,13 @@ async function buscarYRenderizarProveedores(termino) {
         if (!res.ok) throw new Error('Error al buscar proveedores');
         const proveedores = await res.json();
         poblarSelectProveedores(proveedores);
+        // Si hubo término de búsqueda y no hay coincidencias, ofrecer redirigir al registro
+        if (termino && termino.trim() !== '' && Array.isArray(proveedores) && proveedores.length === 0) {
+            const ir = confirm('No se encontraron proveedores con ese criterio. ¿Desea registrar uno nuevo ahora?');
+            if (ir) {
+                window.location.href = 'proveedores.html';
+            }
+        }
     } catch (e) {
         console.error(e);
     }
@@ -167,7 +174,7 @@ async function registrarCompra(event) {
             alert(`Error: ${data.error || 'No se pudo registrar la compra'}`);
             return;
         }
-        alert(`Compra registrada!\nID: ${data.id_compra}\nStock nuevo: ${data.stock_nuevo}`);
+        alert(`Compra registrada!\nID: ${data.id_compra}\nTotal: $${Number(data.total).toFixed(2)}\nStock nuevo: ${data.stock_nuevo}`);
         limpiarFormularioCompra();
     } catch (e) {
         console.error(e);

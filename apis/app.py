@@ -130,6 +130,48 @@ def disminuir_stock(id):
     except Exception as e:
         return jsonify({'error': f'Error inesperado: {str(e)}'}), 500
 
+# Nuevo: actualizar precios de una batería
+@app.route('/api/bateria/<int:id>', methods=['PUT'])
+def actualizar_bateria(id):
+    """Actualiza campos de batería. Actualmente soporta precio_compra y precio_venta."""
+    datos = request.get_json(silent=True) or {}
+    campos_permitidos = ['precio_compra', 'precio_venta']
+    actualizaciones = {k: v for k, v in datos.items() if k in campos_permitidos}
+
+    if not actualizaciones:
+        return jsonify({'error': 'No se proporcionaron campos válidos para actualizar'}), 400
+
+    # Validación de precios
+    for campo, valor in actualizaciones.items():
+        try:
+            num = float(valor)
+            if num < 0:
+                return jsonify({'error': f'{campo} debe ser >= 0'}), 400
+            actualizaciones[campo] = num
+        except (TypeError, ValueError):
+            return jsonify({'error': f'{campo} inválido'}), 400
+
+    try:
+        with obtener_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                set_clause = ', '.join([f"{k} = %s" for k in actualizaciones.keys()])
+                valores = list(actualizaciones.values()) + [id]
+                cursor.execute(f"UPDATE bateria SET {set_clause} WHERE id_bateria = %s", valores)
+                if cursor.rowcount == 0:
+                    return jsonify({'error': 'Batería no encontrada'}), 404
+                conexion.commit()
+
+                cursor.execute(
+                    "SELECT id_bateria as id, marca, modelo, stock, precio_compra, precio_venta FROM bateria WHERE id_bateria = %s",
+                    (id,)
+                )
+                bateria = cursor.fetchone()
+                return jsonify(bateria), 200
+    except pymysql.Error as e:
+        return jsonify({'error': f'Error de base de datos: {str(e)}'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Error inesperado: {str(e)}'}), 500
+
 @app.route('/api/bateria/marcas', methods=['GET'])
 def obtener_marcas_baterias():
     """Obtiene todas las marcas únicas de la tabla baterias."""

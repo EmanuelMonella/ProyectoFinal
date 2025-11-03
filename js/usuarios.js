@@ -86,6 +86,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 mostrarMensaje('error', error.message);
             }
         }
+        if (target.classList.contains('btn-guardar-precios')) {
+            const tr = target.closest('tr');
+            if (!tr) return;
+            const id = target.dataset.id;
+            const inputPc = tr.querySelector('.input-precio-compra');
+            const inputPv = tr.querySelector('.input-precio-venta');
+            if (!inputPc || !inputPv) {
+                mostrarMensaje('error', 'No se encontraron los campos de precios');
+                return;
+            }
+            const pc = parseFloat(inputPc.value);
+            const pv = parseFloat(inputPv.value);
+            if (!validarPrecios(pc, pv)) return;
+            try {
+                const res = await fetch(`http://localhost:5001/api/bateria/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ precio_compra: pc, precio_venta: pv })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || 'No se pudieron actualizar los precios');
+                await cargarBaterias();
+                mostrarMensaje('success', 'Precios actualizados');
+            } catch (err) {
+                mostrarMensaje('error', err.message);
+            }
+        }
     });
 
     async function cargarBaterias(filtro = '') {
@@ -104,11 +131,18 @@ document.addEventListener('DOMContentLoaded', () => {
       <tr>
         <td>${escapeHtml(bateria.marca)}</td>
         <td>${escapeHtml(bateria.modelo)}</td>
+        <td>
+          <input type="number" min="0" step="0.01" class="input-precio-compra" value="${Number(bateria.precio_compra ?? 0)}">
+        </td>
+        <td>
+          <input type="number" min="0" step="0.01" class="input-precio-venta" value="${Number(bateria.precio_venta ?? 0)}">
+        </td>
         <td>${bateria.stock}</td>
         <td>
           <input type="number" min="1" value="1" class="input-stock" data-id="${bateria.id}">
           <button class="btn-disminuir" data-id="${bateria.id}">Disminuir</button>
           <button class="btn-sumar" data-id="${bateria.id}">Sumar</button>
+          <button class="btn-guardar-precios" data-id="${bateria.id}">Guardar precios</button>
         </td>
       </tr>
     `).join('');
@@ -125,6 +159,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (isNaN(precio_compra) || isNaN(precio_venta) || precio_compra < 0 || precio_venta < 0) {
             mostrarMensaje('error', 'Los precios deben ser números mayores o iguales a 0');
+            return false;
+        }
+        return true;
+    }
+
+    function validarPrecios(precio_compra, precio_venta) {
+        if (isNaN(precio_compra) || isNaN(precio_venta)) {
+            mostrarMensaje('error', 'Los precios deben ser numéricos');
+            return false;
+        }
+        if (precio_compra < 0 || precio_venta < 0) {
+            mostrarMensaje('error', 'Los precios deben ser mayores o iguales a 0');
             return false;
         }
         return true;
