@@ -3,51 +3,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAgregar = document.getElementById('btn-agregar');
     const tbody = document.querySelector('#tabla-baterias tbody');
 
+    if (!tbody) {
+        console.warn('No se encontró #tabla-baterias tbody en el DOM');
+        return;
+    }
+
     cargarBaterias();
 
-    btnFiltrar.addEventListener('click', () => {
-        const filtro = document.getElementById('busqueda-nombre').value;
-        cargarBaterias(filtro);
-    });
-        
-    btnAgregar.addEventListener('click', async() => {
-        const marca = document.getElementById('nuevo-marca').value.trim();
-        const modelo = document.getElementById('nuevo-modelo').value.trim();
-        const stockRaw = document.getElementById('nuevo-stock').value;
-        const precioCompraRaw = document.getElementById('nuevo-precio-compra')?.value;
-        const precioVentaRaw = document.getElementById('nuevo-precio-venta')?.value;
-        const stock = parseInt(stockRaw, 10);
-        const precio_compra = precioCompraRaw !== undefined ? parseFloat(precioCompraRaw) : undefined;
-        const precio_venta = precioVentaRaw !== undefined ? parseFloat(precioVentaRaw) : undefined;
+    if (btnFiltrar) {
+        btnFiltrar.addEventListener('click', () => {
+            const filtro = document.getElementById('busqueda-nombre')?.value || '';
+            cargarBaterias(filtro);
+        });
+    }
 
-        if (!validarDatos(marca, modelo, stock, precio_compra, precio_venta)) return;
+    if (btnAgregar) {
+        btnAgregar.addEventListener('click', async() => {
+            const marca = document.getElementById('nuevo-marca')?.value.trim() || '';
+            const modelo = document.getElementById('nuevo-modelo')?.value.trim() || '';
+            const stockRaw = document.getElementById('nuevo-stock')?.value || '';
+            const precioCompraRaw = document.getElementById('nuevo-precio-compra')?.value;
+            const precioVentaRaw = document.getElementById('nuevo-precio-venta')?.value;
+            const stock = parseInt(stockRaw, 10);
+            const precio_compra = precioCompraRaw !== undefined ? parseFloat(precioCompraRaw) : undefined;
+            const precio_venta = precioVentaRaw !== undefined ? parseFloat(precioVentaRaw) : undefined;
 
-        try {
-            const response = await fetch('http://localhost:5001/api/bateria', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    marca: marca,
-                    modelo: modelo,
-                    stock: stock,
-                    precio_compra: precio_compra,
-                    precio_venta: precio_venta
-                })
-            });
+            if (!validarDatos(marca, modelo, stock, precio_compra, precio_venta)) return;
 
-            const data = await response.json();
+            try {
+                const response = await fetch('http://localhost:5001/api/bateria', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        marca: marca,
+                        modelo: modelo,
+                        stock: stock,
+                        precio_compra: precio_compra,
+                        precio_venta: precio_venta
+                    })
+                });
 
-            if (!response.ok) {
-                throw new Error(data.error || `Error al agregar (status ${response.status})`);
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(data.error || `Error al agregar (status ${response.status})`);
+                }
+
+                limpiarFormulario();
+                await cargarBaterias();
+                alert('Batería agregada correctamente');
+            } catch (error) {
+                alert(error.message || 'Error al agregar batería');
             }
-
-            limpiarFormulario();
-            await cargarBaterias();
-            mostrarMensaje('success', 'Batería agregada correctamente');
-        } catch (error) {
-            mostrarMensaje('error', error.message);
-        }
-    });
+        });
+    }
 
     tbody.addEventListener('click', async(e) => {
         const target = e.target;
@@ -57,21 +66,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const input = tr.querySelector('.input-stock');
             if (!input) {
-                mostrarMensaje('error', 'No se encontró el campo de cantidad');
+                alert('No se encontró el campo de cantidad');
                 return;
             }
 
-            const stock = parseInt(input.value, 10);
+            const cantidad = parseInt(input.value, 10);
             const id = target.dataset.id;
             const operacion = target.classList.contains('btn-sumar') ? 'sumar' : 'disminuir';
 
-            if (!validarStock(stock)) return;
+            if (!validarStock(cantidad)) return;
 
             try {
                 const response = await fetch(`http://localhost:5001/api/bateria/${id}/${operacion}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stock: stock })
+                    body: JSON.stringify({ cantidad: cantidad })
                 });
 
                 const resultado = await response.json().catch(() => ({}));
@@ -81,11 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 await cargarBaterias();
-                mostrarMensaje('success', `Stock ${operacion === 'sumar' ? 'aumentado' : 'disminuido'} correctamente`);
+                alert(`Stock ${operacion === 'sumar' ? 'aumentado' : 'disminuido'} correctamente`);
             } catch (error) {
-                mostrarMensaje('error', error.message);
+                alert(error.message || 'Error al actualizar stock');
             }
         }
+
         if (target.classList.contains('btn-guardar-precios')) {
             const tr = target.closest('tr');
             if (!tr) return;
@@ -93,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const inputPc = tr.querySelector('.input-precio-compra');
             const inputPv = tr.querySelector('.input-precio-venta');
             if (!inputPc || !inputPv) {
-                mostrarMensaje('error', 'No se encontraron los campos de precios');
+                alert('No se encontraron los campos de precios');
                 return;
             }
             const pc = parseFloat(inputPc.value);
@@ -108,9 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || 'No se pudieron actualizar los precios');
                 await cargarBaterias();
-                mostrarMensaje('success', 'Precios actualizados');
+                alert('Precios actualizados');
             } catch (err) {
-                mostrarMensaje('error', err.message);
+                alert(err.message || 'Error al actualizar precios');
             }
         }
     });
@@ -122,43 +132,47 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             actualizarTabla(data);
         } catch (error) {
-            mostrarMensaje('error', error.message);
+            alert(error.message || 'Error al cargar baterías');
         }
     }
 
     function actualizarTabla(baterias) {
-        tbody.innerHTML = baterias.map(bateria => `
+        tbody.innerHTML = baterias.map(bateria => {
+            const id = bateria.id ? bateria.id : bateria.id_bateria ? bateria.id_bateria : '';
+            const stock = bateria.stock ? bateria.stock : bateria.cantidad ? bateria.cantidad : 0;
+            return `
       <tr>
-        <td>${escapeHtml(bateria.marca)}</td>
-        <td>${escapeHtml(bateria.modelo)}</td>
+        <td>${bateria.marca || ''}</td>
+        <td>${bateria.modelo || ''}</td>
         <td>
           <input type="number" min="0" step="0.01" class="input-precio-compra" value="${Number(bateria.precio_compra ?? 0)}">
         </td>
         <td>
           <input type="number" min="0" step="0.01" class="input-precio-venta" value="${Number(bateria.precio_venta ?? 0)}">
         </td>
-        <td>${bateria.stock}</td>
+        <td class="col-stock">${stock}</td>
         <td>
-          <input type="number" min="1" value="1" class="input-stock" data-id="${bateria.id}">
-          <button class="btn-disminuir" data-id="${bateria.id}">Disminuir</button>
-          <button class="btn-sumar" data-id="${bateria.id}">Sumar</button>
-          <button class="btn-guardar-precios" data-id="${bateria.id}">Guardar precios</button>
+          <input type="number" min="1" value="1" class="input-stock" data-id="${id}">
+          <button class="btn-disminuir" data-id="${id}">Disminuir</button>
+          <button class="btn-sumar" data-id="${id}">Sumar</button>
+          <button class="btn-guardar-precios" data-id="${id}">Guardar precios</button>
         </td>
       </tr>
-    `).join('');
+    `;
+        }).join('');
     }
 
     function validarDatos(marca, modelo, stock, precio_compra, precio_venta) {
         if (!marca || !modelo || isNaN(stock) || precio_compra === undefined || precio_venta === undefined) {
-            mostrarMensaje('error', 'Todos los campos son requeridos (incluye precios)');
+            alert('Todos los campos son requeridos (incluye precios)');
             return false;
         }
         if (!Number.isInteger(stock) || stock < 0) {
-            mostrarMensaje('error', 'El stock debe ser un entero mayor o igual a 0');
+            alert('El stock debe ser un entero mayor o igual a 0');
             return false;
         }
         if (isNaN(precio_compra) || isNaN(precio_venta) || precio_compra < 0 || precio_venta < 0) {
-            mostrarMensaje('error', 'Los precios deben ser números mayores o iguales a 0');
+            alert('Los precios deben ser números mayores o iguales a 0');
             return false;
         }
         return true;
@@ -166,11 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function validarPrecios(precio_compra, precio_venta) {
         if (isNaN(precio_compra) || isNaN(precio_venta)) {
-            mostrarMensaje('error', 'Los precios deben ser numéricos');
+            alert('Los precios deben ser numéricos');
             return false;
         }
         if (precio_compra < 0 || precio_venta < 0) {
-            mostrarMensaje('error', 'Los precios deben ser mayores o iguales a 0');
+            alert('Los precios deben ser mayores o iguales a 0');
             return false;
         }
         return true;
@@ -178,40 +192,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function validarStock(stock) {
         if (isNaN(stock) || stock < 1 || !Number.isInteger(stock)) {
-            mostrarMensaje('error', 'Stock inválido (mínimo 1 y entero)');
+            alert('Stock inválido (mínimo 1 y entero)');
             return false;
         }
         return true;
     }
 
     function limpiarFormulario() {
-        document.getElementById('nuevo-marca').value = '';
-        document.getElementById('nuevo-modelo').value = '';
-        document.getElementById('nuevo-stock').value = '';
+        const nm = document.getElementById('nuevo-marca');
+        const nmo = document.getElementById('nuevo-modelo');
+        const ns = document.getElementById('nuevo-stock');
+        if (nm) nm.value = '';
+        if (nmo) nmo.value = '';
+        if (ns) ns.value = '';
         const pc = document.getElementById('nuevo-precio-compra');
         const pv = document.getElementById('nuevo-precio-venta');
         if (pc) pc.value = '';
         if (pv) pv.value = '';
-    }
-
-    function escapeHtml(unsafe) {
-        return unsafe ? unsafe.toString()
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;") : '';
-    }
-
-    function mostrarMensaje(tipo, mensaje) {
-        const contenedor = document.createElement('div');
-        contenedor.className = `mensaje-${tipo}`;
-        contenedor.textContent = mensaje;
-
-        document.body.appendChild(contenedor);
-
-        setTimeout(() => {
-            contenedor.remove();
-        }, 5000);
     }
 });

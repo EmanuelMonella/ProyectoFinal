@@ -1,11 +1,3 @@
-//function debounce(fn, delay) {
-//    let t;
-//    return function(...args) {
-//        clearTimeout(t);
-//        t = setTimeout(() => fn.apply(this, args), delay);
-//    };
-//}
-
 function poblarSelectProveedores(proveedores) {
     const sel = document.getElementById('proveedor-select');
     if (!sel) return;
