@@ -1,38 +1,9 @@
 let clienteEditId = null;
 
-function asegurarEncabezado() {
-    const table = document.getElementById('tabla-clientes');
-    if (!table) return;
-
-    let thead = table.querySelector('thead');
-    if (!thead) {
-        thead = document.createElement('thead');
-        const tr = document.createElement('tr');
-        ['ID', 'Nombre', 'Vehículo', 'Teléfono', 'Dirección', 'Acciones'].forEach(text => {
-            const th = document.createElement('th');
-            th.textContent = text;
-            tr.appendChild(th);
-        });
-        thead.appendChild(tr);
-        table.insertBefore(thead, table.firstChild);
-    } else {
-        const headerRow = thead.querySelector('tr');
-        if (!headerRow) return;
-        const firstTh = headerRow.querySelector('th');
-        if (!firstTh || firstTh.textContent.trim().toLowerCase() !== 'id') {
-            const idTh = document.createElement('th');
-            idTh.textContent = 'ID';
-            headerRow.insertBefore(idTh, headerRow.firstChild);
-        }
-    }
-}
-
 function cargarClientes() {
-    asegurarEncabezado();
-
     fetch('http://127.0.0.1:5001/api/clientes')
         .then(res => {
-            if (!res.ok) throw new Error('Error al obtener clientes');
+            if (!res.ok);
             return res.json();
         })
         .then(data => {

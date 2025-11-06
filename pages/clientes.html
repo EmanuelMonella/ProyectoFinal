@@ -32,22 +32,19 @@
             <section class="centrado">
                 <h2 id="titulo-pagina">Gestión de Clientes</h2>
 
-                <!-- Filtrado -->
                 <div style="margin-bottom: 1em;">
                     <input type="text" id="busqueda-clientes" placeholder="Buscar por nombre o vehículo">
                     <button type="button" id="btn-filtrar-clientes">Filtrar</button>
                 </div>
-
-                <!-- Agregar nuevo -->
                 <div style="margin-bottom: 1em;">
                     <input type="text" id="nuevo-nombre" placeholder="Nombre completo*" required>
                     <input type="text" id="nuevo-vehiculo" placeholder="Vehículo (modelo/año)">
-                    <input type="tel" id="nuevo-telefono" placeholder="Teléfono (3515551234)" pattern="[0-9]{10}">
+                    <input type="number" id="nuevo-telefono" placeholder="Teléfono (3515551234)">
                     <input type="text" id="nuevo-direccion" placeholder="Dirección">
                     <button type="button" id="btn-agregar-cliente">Agregar Cliente</button>
                 </div>
 
-                <!-- Listado -->
+
                 <h2>Registro de Clientes</h2>
                 <table id="tabla-clientes" class="tabla">
                     <thead>
@@ -61,7 +58,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Los datos se cargarán aquí dinámicamente -->
+
                     </tbody>
                 </table>
             </section>
@@ -84,7 +81,7 @@
         <p>Desarrollado por Emanuel Monella</p>
     </footer>
 
-    <!-- Modal para editar cliente -->
+
     <div id="modal-edicion">
         <form id="form-editar">
             <h3>Editar Cliente</h3>
