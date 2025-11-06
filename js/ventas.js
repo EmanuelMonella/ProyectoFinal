@@ -165,11 +165,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const inputBuscar = document.getElementById('cliente-buscar');
     if (inputBuscar) {
-        const debounced = debounce(async () => {
+        inputBuscar.addEventListener('input', async () => {
             const term = inputBuscar.value.trim();
-            await buscarYRenderizarClientes(term);
-        }, 300);
-        inputBuscar.addEventListener('input', debounced);
+            await buscarClientes(term);
+        });
     }
 });
 async function cargarClientes() {
@@ -200,24 +199,15 @@ async function cargarClientes() {
     }
 }
 
-function debounce(fn, delay) {
-    let t;
-    return function(...args) {
-        clearTimeout(t);
-        t = setTimeout(() => fn.apply(this, args), delay);
-    };
-}
-
-async function buscarYRenderizarClientes(termino) {
+async function buscarClientes(termino) {
     try {
         const base = 'http://localhost:5001/api/clientes';
         const url = termino ? `${base}?busqueda=${encodeURIComponent(termino)}` : base;
         const res = await fetch(url);
         if (!res.ok) throw new Error('Error al buscar clientes');
         const clientes = await res.json();
-        poblarSelectClientes(clientes);
+        cargarCLientesSelect(clientes);
 
-        // Si hubo término de búsqueda y no hay coincidencias, ofrecer redirigir al registro
         if (termino && termino.trim() !== '' && Array.isArray(clientes) && clientes.length === 0) {
             const ir = confirm('No se encontraron clientes con ese criterio. ¿Desea registrar uno nuevo ahora?');
             if (ir) {
@@ -229,7 +219,7 @@ async function buscarYRenderizarClientes(termino) {
     }
 }
 
-function poblarSelectClientes(clientes) {
+function cargarCLientesSelect(clientes) {
     const sel = document.getElementById('cliente-select');
     if (!sel) return;
     sel.innerHTML = '';

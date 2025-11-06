@@ -1,106 +1,73 @@
-function construirQuery(params) {
+const construirQuery = (params) => {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && String(v).trim() !== '') {
-            query.append(k, v);
-        }
+        if (v?.toString().trim()) query.append(k, v);
     });
     const qs = query.toString();
     return qs ? `?${qs}` : '';
-}
+};
 
-async function fetchVentas(filtros) {
-    const url = `http://localhost:5001/api/ventas${construirQuery(filtros)}`;
+const fetchDatos = async (tipo, filtros) => {
+    const url = `http://localhost:5001/api/${tipo}${construirQuery(filtros)}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error('No se pudieron cargar las ventas');
+    if (!res.ok) throw new Error(`No se pudieron cargar las ${tipo}`);
     return res.json();
-}
+};
 
-async function fetchCompras(filtros) {
-    const url = `http://localhost:5001/api/compras${construirQuery(filtros)}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('No se pudieron cargar las compras');
-    return res.json();
-}
+const formatoMoneda = (valor) => 
+    Number(valor || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
 
-function formatoMoneda(valor) {
-    const num = Number(valor || 0);
-    return num.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
-}
-
-function renderVentas(filas) {
-    const tbody = document.querySelector('#tabla-ventas tbody');
-    tbody.innerHTML = '';
-    filas.forEach(v => {
-        const tr = document.createElement('tr');
-        const totalFila = Number(v.cantidad) * Number(v.precio_unitario);
-        tr.innerHTML = `
-            <td>${v.fecha ?? ''}</td>
-            <td>${v.cliente ?? ''}</td>
-            <td>${v.marca}</td>
-            <td>${v.modelo}</td>
-            <td>${v.cantidad}</td>
-            <td>${formatoMoneda(v.precio_unitario)}</td>
-            <td>${formatoMoneda(totalFila)}</td>
+const renderTabla = (selector, filas, campoEntidad) => {
+    const tbody = document.querySelector(`${selector} tbody`);
+    tbody.innerHTML = filas.map(item => {
+        const total = Number(item.cantidad) * Number(item.precio_unitario);
+        return `
+            <tr>
+                <td>${item.fecha ?? ''}</td>
+                <td>${item[campoEntidad] ?? ''}</td>
+                <td>${item.marca}</td>
+                <td>${item.modelo}</td>
+                <td>${item.cantidad}</td>
+                <td>${formatoMoneda(item.precio_unitario)}</td>
+                <td>${formatoMoneda(total)}</td>
+            </tr>
         `;
-        tbody.appendChild(tr);
-    });
-}
+    }).join('');
+};
 
-function renderCompras(filas) {
-    const tbody = document.querySelector('#tabla-compras tbody');
-    tbody.innerHTML = '';
-    filas.forEach(c => {
-        const tr = document.createElement('tr');
-        const totalFila = Number(c.cantidad) * Number(c.precio_unitario);
-        tr.innerHTML = `
-            <td>${c.fecha ?? ''}</td>
-            <td>${c.proveedor ?? ''}</td>
-            <td>${c.marca}</td>
-            <td>${c.modelo}</td>
-            <td>${c.cantidad}</td>
-            <td>${formatoMoneda(c.precio_unitario)}</td>
-            <td>${formatoMoneda(totalFila)}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
+const obtenerFiltros = () => ({
+    fecha_desde: document.getElementById('fecha-desde').value,
+    fecha_hasta: document.getElementById('fecha-hasta').value,
+    marca: document.getElementById('filtro-marca').value,
+    modelo: document.getElementById('filtro-modelo').value
+});
 
 async function cargarReportes() {
     const tipo = document.getElementById('tipo').value;
-    const filtrosBase = {
-        fecha_desde: document.getElementById('fecha-desde').value,
-        fecha_hasta: document.getElementById('fecha-hasta').value,
-        marca: document.getElementById('filtro-marca').value,
-        modelo: document.getElementById('filtro-modelo').value
-    };
+    const filtros = obtenerFiltros();
 
     try {
-        if (tipo === 'ventas' || tipo === 'todos') {
-            const ventas = await fetchVentas(filtrosBase);
-            renderVentas(ventas);
-        } else {
-            renderVentas([]);
-        }
+        const debeCargarVentas = tipo === 'ventas' || tipo === 'todos';
+        const debeCargarCompras = tipo === 'compras' || tipo === 'todos';
 
-        if (tipo === 'compras' || tipo === 'todos') {
-            const compras = await fetchCompras(filtrosBase);
-            renderCompras(compras);
-        } else {
-            renderCompras([]);
-        }
+        const [ventas, compras] = await Promise.all([
+            debeCargarVentas ? fetchDatos('ventas', filtros) : Promise.resolve([]),
+            debeCargarCompras ? fetchDatos('compras', filtros) : Promise.resolve([])
+        ]);
+
+        renderTabla('#tabla-ventas', ventas, 'cliente');
+        renderTabla('#tabla-compras', compras, 'proveedor');
     } catch (e) {
         alert(e.message || 'Error al cargar reportes');
     }
 }
 
-function limpiarFiltros() {
+const limpiarFiltros = () => {
     document.getElementById('tipo').value = 'todos';
-    document.getElementById('fecha-desde').value = '';
-    document.getElementById('fecha-hasta').value = '';
-    document.getElementById('filtro-marca').value = '';
-    document.getElementById('filtro-modelo').value = '';
-}
+    ['fecha-desde', 'fecha-hasta', 'filtro-marca', 'filtro-modelo'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-filtrar').addEventListener('click', cargarReportes);
