@@ -1,3 +1,92 @@
+function validarDatos(marca, modelo, stock, precio_compra, precio_venta) {
+    if (!marca || !modelo || isNaN(stock) || precio_compra === undefined || precio_venta === undefined) {
+        alert('Todos los campos son requeridos (incluye precios)');
+        return false;
+    }
+    if (!Number.isInteger(stock) || stock < 0) {
+        alert('El stock debe ser un entero mayor o igual a 0');
+        return false;
+    }
+    if (isNaN(precio_compra) || isNaN(precio_venta) || precio_compra < 0 || precio_venta < 0) {
+        alert('Los precios deben ser números mayores o iguales a 0');
+        return false;
+    }
+    return true;
+}
+
+function validarPrecios(precio_compra, precio_venta) {
+    if (isNaN(precio_compra) || isNaN(precio_venta)) {
+        alert('Los precios deben ser numéricos');
+        return false;
+    }
+    if (precio_compra < 0 || precio_venta < 0) {
+        alert('Los precios deben ser mayores o iguales a 0');
+        return false;
+    }
+    return true;
+}
+
+function validarStock(stock) {
+    if (isNaN(stock) || stock < 1 || !Number.isInteger(stock)) {
+        alert('Stock inválido (mínimo 1 y entero)');
+        return false;
+    }
+    return true;
+}
+
+function limpiarFormulario() {
+    const nm = document.getElementById('nuevo-marca');
+    const nmo = document.getElementById('nuevo-modelo');
+    const ns = document.getElementById('nuevo-stock');
+    if (nm) nm.value = '';
+    if (nmo) nmo.value = '';
+    if (ns) ns.value = '';
+    const pc = document.getElementById('nuevo-precio-compra');
+    const pv = document.getElementById('nuevo-precio-venta');
+    if (pc) pc.value = '';
+    if (pv) pv.value = '';
+}
+
+async function cargarBaterias(filtro = '') {
+    try {
+        const response = await fetch(`http://localhost:5001/api/bateria?marca=${encodeURIComponent(filtro)}`);
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        const data = await response.json();
+        actualizarTabla(data);
+    } catch (error) {
+        alert(error.message || 'Error al cargar baterías');
+    }
+}
+
+function actualizarTabla(baterias) {
+    const tbody = document.querySelector('#tabla-baterias tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = baterias.map(bateria => {
+        const id = bateria.id ? bateria.id : bateria.id_bateria ? bateria.id_bateria : '';
+        const stock = bateria.stock ? bateria.stock : bateria.cantidad ? bateria.cantidad : 0;
+        return `
+      <tr>
+        <td>${bateria.marca || ''}</td>
+        <td>${bateria.modelo || ''}</td>
+        <td>
+          <input type="number" min="0" step="0.01" class="input-precio-compra" value="${Number(bateria.precio_compra ?? 0)}">
+        </td>
+        <td>
+          <input type="number" min="0" step="0.01" class="input-precio-venta" value="${Number(bateria.precio_venta ?? 0)}">
+        </td>
+        <td class="col-stock">${stock}</td>
+        <td>
+          <input type="number" min="1" value="1" class="input-stock" data-id="${id}">
+          <button class="btn-disminuir" data-id="${id}">Disminuir</button>
+          <button class="btn-sumar" data-id="${id}">Sumar</button>
+          <button class="btn-guardar-precios" data-id="${id}">Guardar precios</button>
+        </td>
+      </tr>
+    `;
+    }).join('');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const btnFiltrar = document.getElementById('btn-filtrar');
     const btnAgregar = document.getElementById('btn-agregar');
@@ -60,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tbody.addEventListener('click', async(e) => {
         const target = e.target;
+        
         if (target.classList.contains('btn-sumar') || target.classList.contains('btn-disminuir')) {
             const tr = target.closest('tr');
             if (!tr) return;
@@ -124,90 +214,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    async function cargarBaterias(filtro = '') {
-        try {
-            const response = await fetch(`http://localhost:5001/api/bateria?marca=${encodeURIComponent(filtro)}`);
-            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            const data = await response.json();
-            actualizarTabla(data);
-        } catch (error) {
-            alert(error.message || 'Error al cargar baterías');
-        }
-    }
-
-    function actualizarTabla(baterias) {
-        tbody.innerHTML = baterias.map(bateria => {
-            const id = bateria.id ? bateria.id : bateria.id_bateria ? bateria.id_bateria : '';
-            const stock = bateria.stock ? bateria.stock : bateria.cantidad ? bateria.cantidad : 0;
-            return `
-      <tr>
-        <td>${bateria.marca || ''}</td>
-        <td>${bateria.modelo || ''}</td>
-        <td>
-          <input type="number" min="0" step="0.01" class="input-precio-compra" value="${Number(bateria.precio_compra ?? 0)}">
-        </td>
-        <td>
-          <input type="number" min="0" step="0.01" class="input-precio-venta" value="${Number(bateria.precio_venta ?? 0)}">
-        </td>
-        <td class="col-stock">${stock}</td>
-        <td>
-          <input type="number" min="1" value="1" class="input-stock" data-id="${id}">
-          <button class="btn-disminuir" data-id="${id}">Disminuir</button>
-          <button class="btn-sumar" data-id="${id}">Sumar</button>
-          <button class="btn-guardar-precios" data-id="${id}">Guardar precios</button>
-        </td>
-      </tr>
-    `;
-        }).join('');
-    }
-
-    function validarDatos(marca, modelo, stock, precio_compra, precio_venta) {
-        if (!marca || !modelo || isNaN(stock) || precio_compra === undefined || precio_venta === undefined) {
-            alert('Todos los campos son requeridos (incluye precios)');
-            return false;
-        }
-        if (!Number.isInteger(stock) || stock < 0) {
-            alert('El stock debe ser un entero mayor o igual a 0');
-            return false;
-        }
-        if (isNaN(precio_compra) || isNaN(precio_venta) || precio_compra < 0 || precio_venta < 0) {
-            alert('Los precios deben ser números mayores o iguales a 0');
-            return false;
-        }
-        return true;
-    }
-
-    function validarPrecios(precio_compra, precio_venta) {
-        if (isNaN(precio_compra) || isNaN(precio_venta)) {
-            alert('Los precios deben ser numéricos');
-            return false;
-        }
-        if (precio_compra < 0 || precio_venta < 0) {
-            alert('Los precios deben ser mayores o iguales a 0');
-            return false;
-        }
-        return true;
-    }
-
-    function validarStock(stock) {
-        if (isNaN(stock) || stock < 1 || !Number.isInteger(stock)) {
-            alert('Stock inválido (mínimo 1 y entero)');
-            return false;
-        }
-        return true;
-    }
-
-    function limpiarFormulario() {
-        const nm = document.getElementById('nuevo-marca');
-        const nmo = document.getElementById('nuevo-modelo');
-        const ns = document.getElementById('nuevo-stock');
-        if (nm) nm.value = '';
-        if (nmo) nmo.value = '';
-        if (ns) ns.value = '';
-        const pc = document.getElementById('nuevo-precio-compra');
-        const pv = document.getElementById('nuevo-precio-venta');
-        if (pc) pc.value = '';
-        if (pv) pv.value = '';
-    }
 });

@@ -1,81 +1,120 @@
-const construirQuery = (params) => {
+function construirQuery(params) {
     const query = new URLSearchParams();
-    Object.entries(params).forEach(([k, v]) => {
-        if (v?.toString().trim()) query.append(k, v);
-    });
-    const qs = query.toString();
-    return qs ? `?${qs}` : '';
-};
+    for (const [clave, valor] of Object.entries(params)) {
+        if (valor?.toString().trim()) {
+            query.append(clave, valor);
+        }
+    }
+    const queryString = query.toString();
+    return queryString ? `?${queryString}` : '';
+}
 
-const fetchDatos = async (tipo, filtros) => {
+async function obtenerDatos(tipo, filtros) {
     const url = `http://localhost:5001/api/${tipo}${construirQuery(filtros)}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`No se pudieron cargar las ${tipo}`);
-    return res.json();
-};
+    const respuesta = await fetch(url);
+    if (!respuesta.ok) {
+        throw new Error(`Error al cargar ${tipo}`);
+    }
+    return respuesta.json();
+}
 
-const formatoMoneda = (valor) => 
-    Number(valor || 0).toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+function formatoMoneda(valor) {
+    const numero = Number(valor || 0);
+    return numero.toLocaleString('es-AR', { 
+        style: 'currency', 
+        currency: 'ARS' 
+    });
+}
 
-const renderTabla = (selector, filas, campoEntidad) => {
-    const tbody = document.querySelector(`${selector} tbody`);
-    tbody.innerHTML = filas.map(item => {
-        const total = Number(item.cantidad) * Number(item.precio_unitario);
+// Renderiza una tabla con los datos
+function renderizarTabla(selectorTabla, datos, nombreCampo) {
+    const tbody = document.querySelector(`${selectorTabla} tbody`);
+    
+    if (!datos || datos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7">No hay datos para mostrar</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = datos.map(item => {
+        const cantidad = Number(item.cantidad || 0);
+        const precioUnitario = Number(item.precio_unitario || 0);
+        const total = cantidad * precioUnitario;
+        
         return `
             <tr>
-                <td>${item.fecha ?? ''}</td>
-                <td>${item[campoEntidad] ?? ''}</td>
-                <td>${item.marca}</td>
-                <td>${item.modelo}</td>
-                <td>${item.cantidad}</td>
-                <td>${formatoMoneda(item.precio_unitario)}</td>
+                <td>${item.fecha || ''}</td>
+                <td>${item[nombreCampo] || ''}</td>
+                <td>${item.marca || ''}</td>
+                <td>${item.modelo || ''}</td>
+                <td>${cantidad}</td>
+                <td>${formatoMoneda(precioUnitario)}</td>
                 <td>${formatoMoneda(total)}</td>
             </tr>
         `;
     }).join('');
-};
+}
 
-const obtenerFiltros = () => ({
-    fecha_desde: document.getElementById('fecha-desde').value,
-    fecha_hasta: document.getElementById('fecha-hasta').value,
-    marca: document.getElementById('filtro-marca').value,
-    modelo: document.getElementById('filtro-modelo').value
-});
+// Obtiene los valores de los filtros del formulario
+function obtenerFiltros() {
+    return {
+        fecha_desde: document.getElementById('fecha-desde').value.trim(),
+        fecha_hasta: document.getElementById('fecha-hasta').value.trim(),
+        marca: document.getElementById('filtro-marca').value.trim(),
+        modelo: document.getElementById('filtro-modelo').value.trim()
+    };
+}
 
+// Carga y muestra los reportes según los filtros
 async function cargarReportes() {
-    const tipo = document.getElementById('tipo').value;
+    const tipoSeleccionado = document.getElementById('tipo').value;
     const filtros = obtenerFiltros();
-
+    
     try {
-        const debeCargarVentas = tipo === 'ventas' || tipo === 'todos';
-        const debeCargarCompras = tipo === 'compras' || tipo === 'todos';
-
+        // Determinar qué datos cargar
+        const cargarVentas = tipoSeleccionado === 'ventas' || tipoSeleccionado === 'todos';
+        const cargarCompras = tipoSeleccionado === 'compras' || tipoSeleccionado === 'todos';
+        
+        // Cargar datos en paralelo (solo los necesarios)
+        const promesas = {
+            ventas: cargarVentas ? obtenerDatos('ventas', filtros) : Promise.resolve([]),
+            compras: cargarCompras ? obtenerDatos('compras', filtros) : Promise.resolve([])
+        };
+        
         const [ventas, compras] = await Promise.all([
-            debeCargarVentas ? fetchDatos('ventas', filtros) : Promise.resolve([]),
-            debeCargarCompras ? fetchDatos('compras', filtros) : Promise.resolve([])
+            promesas.ventas,
+            promesas.compras
         ]);
-
-        renderTabla('#tabla-ventas', ventas, 'cliente');
-        renderTabla('#tabla-compras', compras, 'proveedor');
-    } catch (e) {
-        alert(e.message || 'Error al cargar reportes');
+        
+        // Renderizar tablas
+        renderizarTabla('#tabla-ventas', ventas, 'cliente');
+        renderizarTabla('#tabla-compras', compras, 'proveedor');
+        
+    } catch (error) {
+        alert(error.message || 'Error al cargar los reportes');
+        console.error('Error:', error);
     }
 }
 
-const limpiarFiltros = () => {
+// Limpia todos los filtros y recarga los reportes
+function limpiarFiltros() {
     document.getElementById('tipo').value = 'todos';
-    ['fecha-desde', 'fecha-hasta', 'filtro-marca', 'filtro-modelo'].forEach(id => {
-        document.getElementById(id).value = '';
-    });
-};
+    document.getElementById('fecha-desde').value = '';
+    document.getElementById('fecha-hasta').value = '';
+    document.getElementById('filtro-marca').value = '';
+    document.getElementById('filtro-modelo').value = '';
+}
 
+// Inicialización cuando se carga la página
 document.addEventListener('DOMContentLoaded', () => {
+    // Botón filtrar
     document.getElementById('btn-filtrar').addEventListener('click', cargarReportes);
+    
+    // Botón limpiar
     document.getElementById('btn-limpiar').addEventListener('click', () => {
         limpiarFiltros();
         cargarReportes();
     });
+    
+    // Cargar reportes al inicio
     cargarReportes();
 });
-
-
