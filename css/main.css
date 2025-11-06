@@ -125,54 +125,36 @@ form {
 }
 
 
-/* Estilos del modal (mejorados) */
-
 #modal-edicion {
     display: none;
-    /* oculto por defecto */
     position: fixed;
     inset: 0;
-    /* top:0; right:0; bottom:0; left:0; */
     background-color: rgba(0, 0, 0, 0.5);
-    /* overlay */
     z-index: 1000;
     align-items: center;
     justify-content: center;
     padding: 20px;
 }
 
-
-/* clase alternativa si prefieres activar por clase: <div id="modal-edicion" class="show"> */
-
 #modal-edicion.show {
     display: flex;
 }
-
-
-/* Sobrescribir el comportamiento global de `form` para el modal */
 
 #form-editar,
 #form-editar-proveedor {
     display: flex;
     flex-direction: column;
-    /* campos uno debajo del otro */
     gap: 12px;
-    /* espacio entre campos */
     background-color: #ffffff;
     padding: 32px;
-    /* más grande */
     border-radius: 12px;
     width: 100%;
     max-width: 720px;
-    /* modal más ancho */
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
     color: #333;
     font-family: inherit;
     transition: transform 0.18s ease, opacity 0.18s ease;
 }
-
-
-/* Asegurar que los inputs ocupen línea completa */
 
 #form-editar input[type="text"],
 #form-editar input[type="tel"],
@@ -184,9 +166,6 @@ form {
     box-sizing: border-box;
 }
 
-
-/* Botones alineados a la derecha y con tamaño más cómodo */
-
 #form-editar button,
 #form-editar-proveedor button {
     min-width: 140px;
@@ -195,19 +174,12 @@ form {
     font-weight: 700;
     cursor: pointer;
     align-self: flex-end;
-    /* coloca los botones al final (derecha) */
 }
-
-
-/* Si quieres dos botones juntos, mantén pequeño margen entre ellos */
 
 #form-editar button+button,
 #form-editar-proveedor button+button {
     margin-left: 8px;
 }
-
-
-/* Ajustes para pantallas pequeñas */
 
 @media (max-width: 520px) {
 
@@ -222,9 +194,6 @@ form {
         min-width: 120px;
     }
 }
-
-
-/* Estilos para mensajes de notificación */
 
 .mensaje-success {
     position: fixed;

@@ -130,7 +130,6 @@ def disminuir_stock(id):
     except Exception as e:
         return jsonify({'error': f'Error inesperado: {str(e)}'}), 500
 
-# Nuevo: actualizar precios de una batería
 @app.route('/api/bateria/<int:id>', methods=['PUT'])
 def actualizar_bateria(id):
     """Actualiza campos de batería. Actualmente soporta precio_compra y precio_venta."""
@@ -141,7 +140,6 @@ def actualizar_bateria(id):
     if not actualizaciones:
         return jsonify({'error': 'No se proporcionaron campos válidos para actualizar'}), 400
 
-    # Validación de precios
     for campo, valor in actualizaciones.items():
         try:
             num = float(valor)
