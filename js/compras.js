@@ -146,6 +146,7 @@ async function registrarCompra(event) {
     const id_proveedor = proveedorSel ? parseInt(proveedorSel.value || '') : null;
 
     if (!marca || !modelo || !cantidad || Number.isNaN(cantidad) || cantidad < 1) {
+        alert(!marca,!modelo,!cantidad)
         alert('Complete Marca, Modelo y una Cantidad válida (>0)');
         return;
     }
