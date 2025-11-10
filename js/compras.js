@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const inputBuscar = document.getElementById('proveedor-buscar');
     if (inputBuscar) {
-        const debounced = debounce(async () => {
+        const debounced = debounce(async() => {
             const term = inputBuscar.value.trim();
             await buscarYRenderizarProveedores(term);
         }, 300);
@@ -134,17 +134,17 @@ async function cargarModelosPorMarca(marca) {
         selectModelo.disabled = true;
     }
 }
-            
+
 async function registrarCompra(event) {
     event.preventDefault();
-    const marca = document.getElementById('marca-batería')?.value;
-    const modelo = document.getElementById('modelo-bateria')?.value;
-    const cantidad = parseInt(document.getElementById('cantidad-bateria')?.value || '');
+    const marca = document.getElementById('marca-batería') ?.value;
+    const modelo = document.getElementById('modelo-bateria') ?.value;
+    const cantidad = parseInt(document.getElementById('cantidad-bateria') ?.value);
     const proveedorSel = document.getElementById('proveedor-select');
     const id_proveedor = proveedorSel ? parseInt(proveedorSel.value || '') : null;
-    const comentario = document.getElementById('comentario')?.value || null;
 
     if (!marca || !modelo || !cantidad || Number.isNaN(cantidad) || cantidad < 1) {
+        alert(marca, modelo, cantidad)
         alert('Complete Marca, Modelo y una Cantidad válida (>0)');
         return;
     }
@@ -191,4 +191,3 @@ function descartarCompra() {
         limpiarFormularioCompra();
     }
 }
-

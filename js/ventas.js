@@ -4,24 +4,24 @@ async function cargarMarcasBaterias() {
         if (!response.ok) {
             throw new Error('Error al cargar las marcas');
         }
-        
+
         const marcas = await response.json();
         const selectMarca = document.getElementById('marca-batería');
-        
+
         selectMarca.innerHTML = '';
-        
+
         const opcionDefault = document.createElement('option');
         opcionDefault.value = '';
         opcionDefault.textContent = 'Seleccione una marca';
         selectMarca.appendChild(opcionDefault);
-        
+
         marcas.forEach(marca => {
             const opcion = document.createElement('option');
             opcion.value = marca;
             opcion.textContent = marca;
             selectMarca.appendChild(opcion);
         });
-        
+
     } catch (error) {
         console.error('Error al cargar marcas:', error);
         const selectMarca = document.getElementById('marca-batería');
@@ -31,31 +31,31 @@ async function cargarMarcasBaterias() {
 
 async function cargarModelosPorMarca(marca) {
     const selectModelo = document.getElementById('modelo-bateria');
-    
+
     selectModelo.innerHTML = '<option value="">Cargando modelos...</option>';
-    
+
     if (!marca) {
         selectModelo.innerHTML = '<option value="">Seleccione primero una marca</option>';
         selectModelo.disabled = true;
         return;
     }
-    
+
     try {
         const response = await fetch(`http://localhost:5001/api/bateria/modelos?marca=${encodeURIComponent(marca)}`);
         if (!response.ok) {
             throw new Error('Error al cargar los modelos');
         }
-        
+
         const modelos = await response.json();
-        
+
         selectModelo.innerHTML = '';
         selectModelo.disabled = false;
-        
+
         const opcionDefault = document.createElement('option');
         opcionDefault.value = '';
         opcionDefault.textContent = 'Seleccione un modelo';
         selectModelo.appendChild(opcionDefault);
-        
+
         modelos.forEach(modelo => {
             const opcion = document.createElement('option');
             opcion.value = modelo.modelo;
@@ -63,7 +63,7 @@ async function cargarModelosPorMarca(marca) {
             opcion.dataset.stock = modelo.stock;
             selectModelo.appendChild(opcion);
         });
-        
+
     } catch (error) {
         console.error('Error al cargar modelos:', error);
         selectModelo.innerHTML = '<option value="">Error al cargar modelos</option>';
@@ -73,32 +73,32 @@ async function cargarModelosPorMarca(marca) {
 
 async function registrarVenta(event) {
     event.preventDefault();
-    
+
     const marca = document.getElementById('marca-batería').value;
     const modelo = document.getElementById('modelo-bateria').value;
     const cantidad = parseInt(document.getElementById('cantidad-bateria').value);
     const clienteSelect = document.getElementById('cliente-select');
     const idCliente = clienteSelect ? parseInt(clienteSelect.value || '') : null;
-    
+
     if (!marca || !modelo || !cantidad) {
         alert('Por favor complete todos los campos requeridos (Marca, Modelo y Cantidad)');
         return;
     }
-    
+
     if (cantidad <= 0) {
         alert('La cantidad debe ser mayor a 0');
         return;
     }
-    
+
     const selectModelo = document.getElementById('modelo-bateria');
     const opcionSeleccionada = selectModelo.options[selectModelo.selectedIndex];
     const stockDisponible = parseInt(opcionSeleccionada.dataset.stock);
-    
+
     if (stockDisponible < cantidad) {
         alert(`Stock insuficiente. Disponible: ${stockDisponible}, Solicitado: ${cantidad}`);
         return;
     }
-    
+
     try {
         const response = await fetch('http://localhost:5001/api/ventas', {
             method: 'POST',
@@ -112,16 +112,16 @@ async function registrarVenta(event) {
                 id_cliente: Number.isNaN(idCliente) ? null : idCliente
             })
         });
-        
+
         const resultado = await response.json();
-        
+
         if (!response.ok) {
             alert(`Error: ${resultado.error || 'Error al registrar la venta'}`);
             return;
         }
-        
+
         alert(`Venta registrada exitosamente!\nID de venta: ${resultado.id_venta}\nTotal: $${Number(resultado.total).toFixed(2)}\nStock restante: ${resultado.stock_restante}`);
-        
+
         document.getElementById('marca-batería').value = '';
         cargarModelosPorMarca('');
         document.getElementById('cantidad-bateria').value = '';
@@ -130,7 +130,7 @@ async function registrarVenta(event) {
         }
 
         cargarMarcasBaterias();
-        
+
     } catch (error) {
         console.error('Error al registrar venta:', error);
         alert('Error al conectar con el servidor. Por favor, intente nuevamente.');
@@ -151,21 +151,21 @@ function descartarVenta() {
 document.addEventListener('DOMContentLoaded', function() {
     cargarMarcasBaterias();
     cargarClientes();
-    
+
     const selectMarca = document.getElementById('marca-batería');
     selectMarca.addEventListener('change', function() {
         cargarModelosPorMarca(this.value);
     });
-    
+
     const formulario = document.querySelector('form');
     formulario.addEventListener('submit', registrarVenta);
-    
+
     const btnDescartar = document.querySelector('input[value="Descartar"]');
     btnDescartar.addEventListener('click', descartarVenta);
 
     const inputBuscar = document.getElementById('cliente-buscar');
     if (inputBuscar) {
-        inputBuscar.addEventListener('input', async () => {
+        inputBuscar.addEventListener('input', async() => {
             const term = inputBuscar.value.trim();
             await buscarClientes(term);
         });
@@ -234,4 +234,3 @@ function cargarCLientesSelect(clientes) {
         sel.appendChild(opt);
     });
 }
-
