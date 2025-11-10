@@ -139,12 +139,13 @@ async function registrarCompra(event) {
     event.preventDefault();
     const marca = document.getElementById('marca-batería') ?.value;
     const modelo = document.getElementById('modelo-bateria') ?.value;
-    const cantidad = parseInt(document.getElementById('cantidad-bateria') ?.value);
+    const cantidad = parseInt(document.getElementById('cantidad-compra') ?.value);
+    const comentarioRaw = document.getElementById('comentario') ?.value || '';
+    const comentario = comentarioRaw.trim() === '' ? null : comentarioRaw.trim();
     const proveedorSel = document.getElementById('proveedor-select');
     const id_proveedor = proveedorSel ? parseInt(proveedorSel.value || '') : null;
 
     if (!marca || !modelo || !cantidad || Number.isNaN(cantidad) || cantidad < 1) {
-        alert(marca, modelo, cantidad)
         alert('Complete Marca, Modelo y una Cantidad válida (>0)');
         return;
     }
@@ -178,7 +179,7 @@ function limpiarFormularioCompra() {
     const marca = document.getElementById('marca-batería');
     if (marca) marca.value = '';
     cargarModelosPorMarca('');
-    const cantidad = document.getElementById('cantidad-bateria');
+    const cantidad = document.getElementById('cantidad-compra');
     if (cantidad) cantidad.value = '';
     const selProv = document.getElementById('proveedor-select');
     if (selProv) selProv.value = '';
