@@ -35,7 +35,6 @@ async function buscarYRenderizarProveedores(termino) {
         if (!res.ok) throw new Error('Error al buscar proveedores');
         const proveedores = await res.json();
         poblarSelectProveedores(proveedores);
-        // Si hubo término de búsqueda y no hay coincidencias, ofrecer redirigir al registro
         if (termino && termino.trim() !== '' && Array.isArray(proveedores) && proveedores.length === 0) {
             const ir = confirm('No se encontraron proveedores con ese criterio. ¿Desea registrar uno nuevo ahora?');
             if (ir) {
@@ -142,8 +141,6 @@ async function registrarCompra(event) {
     const cantidad = parseInt(document.getElementById('cantidad-compra') ?.value);
     const comentarioRaw = document.getElementById('comentario') ?.value || '';
     const comentario = comentarioRaw.trim() === '' ? null : comentarioRaw.trim();
-    const proveedorSel = document.getElementById('proveedor-select');
-    const id_proveedor = proveedorSel ? parseInt(proveedorSel.value || '') : null;
 
     if (!marca || !modelo || !cantidad || Number.isNaN(cantidad) || cantidad < 1) {
         alert(!marca,!modelo,!cantidad)
@@ -151,7 +148,25 @@ async function registrarCompra(event) {
         return;
     }
 
+    const proveedorSel = document.getElementById('proveedor-select');
+    const nombreProveedor = proveedorSel && proveedorSel.selectedIndex > 0 
+        ? proveedorSel.options[proveedorSel.selectedIndex].textContent 
+        : 'Sin proveedor';
+
+    const mensajeConfirmacion = `¿Confirmar compra?\n\n` +
+        `Marca: ${marca}\n` +
+        `Modelo: ${modelo}\n` +
+        `Cantidad: ${cantidad}\n` +
+        `Proveedor: ${nombreProveedor}`;
+    
+    if (!confirm(mensajeConfirmacion)) {
+        return;
+    }
+
     try {
+        const proveedorSel = document.getElementById('proveedor-select');
+        const id_proveedor = proveedorSel ? parseInt(proveedorSel.value || '') : null;
+        
         const res = await fetch('http://localhost:5001/api/compras', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

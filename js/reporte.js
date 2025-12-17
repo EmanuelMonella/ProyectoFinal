@@ -26,6 +26,27 @@ function formatoMoneda(valor) {
     });
 }
 
+function formatoFecha(fecha) {
+    if (!fecha) return '';
+    const fechaObj = new Date(fecha);
+    if (isNaN(fechaObj.getTime())) {
+        const partes = fecha.toString().split(/[-/]/);
+        if (partes.length === 3) {
+            if (partes[0].length === 4) {
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+            return fecha;
+        }
+        return fecha;
+    }
+    
+    const dia = String(fechaObj.getDate()).padStart(2, '0');
+    const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+    const año = fechaObj.getFullYear();
+    
+    return `${dia}/${mes}/${año}`;
+}
+
 function renderizarTabla(selectorTabla, datos, nombreCampo) {
     const tbody = document.querySelector(`${selectorTabla} tbody`);
     
@@ -41,7 +62,7 @@ function renderizarTabla(selectorTabla, datos, nombreCampo) {
         
         return `
             <tr>
-                <td>${item.fecha || ''}</td>
+                <td>${formatoFecha(item.fecha)}</td>
                 <td>${item[nombreCampo] || ''}</td>
                 <td>${item.marca || ''}</td>
                 <td>${item.modelo || ''}</td>
@@ -88,7 +109,6 @@ async function cargarReportes() {
     }
 }
 
-// Limpia todos los filtros y recarga los reportes
 function limpiarFiltros() {
     document.getElementById('tipo').value = 'todos';
     document.getElementById('fecha-desde').value = '';

@@ -77,8 +77,6 @@ async function registrarVenta(event) {
     const marca = document.getElementById('marca-batería').value;
     const modelo = document.getElementById('modelo-bateria').value;
     const cantidad = parseInt(document.getElementById('cantidad-bateria').value);
-    const clienteSelect = document.getElementById('cliente-select');
-    const idCliente = clienteSelect ? parseInt(clienteSelect.value || '') : null;
 
     if (!marca || !modelo || !cantidad) {
         alert('Por favor complete todos los campos requeridos (Marca, Modelo y Cantidad)');
@@ -99,7 +97,28 @@ async function registrarVenta(event) {
         return;
     }
 
+    // Obtener información del cliente para la confirmación
+    const clienteSelect = document.getElementById('cliente-select');
+    const nombreCliente = clienteSelect && clienteSelect.selectedIndex > 0 
+        ? clienteSelect.options[clienteSelect.selectedIndex].textContent 
+        : 'Sin cliente';
+
+    // Confirmar antes de ejecutar la operación
+    const mensajeConfirmacion = `¿Confirmar venta?\n\n` +
+        `Marca: ${marca}\n` +
+        `Modelo: ${modelo}\n` +
+        `Cantidad: ${cantidad}\n` +
+        `Stock disponible: ${stockDisponible}\n` +
+        `Cliente: ${nombreCliente}`;
+    
+    if (!confirm(mensajeConfirmacion)) {
+        return;
+    }
+
     try {
+        const clienteSelect = document.getElementById('cliente-select');
+        const idCliente = clienteSelect ? parseInt(clienteSelect.value || '') : null;
+        
         const response = await fetch('http://localhost:5001/api/ventas', {
             method: 'POST',
             headers: {
